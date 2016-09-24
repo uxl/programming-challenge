@@ -37,6 +37,13 @@ and ecosystems. Have fun with it.
 
 This project is bootstrapped to transpile TypeScript into JavaScript. TypeScript is very much like C# or ActionScript. It is a superset of JavaScript. This means that all JavaScript is valid TypeScript. Feel free to code this in vanilla ES6 JavaScript, but having type information is very helpful especially coming from a C++/Java/C# background.
 
+To take advantage of TypeScript's strong types and an IDE's helpful autocomplete, install the Atom Editor and install the `atom-typescript` package.
+
+Globally install `typings`. To do this, run the command `npm install typings -g`. `typings` allows you to install type information
+about external npm modules. For example, if you were to use the
+external module `async`, you would `npm install async`, and the run `typings search async`. It will display the name and the source.
+To install the typings (which will be put in the `typings` folder of this project) run `typings install dt~async --global`. Then the TypeScript compiler will know how to compile against the async module.
+
 The entry point to the application is `index.html`, which in turn points immediately to `index.js`. The typescript files in `src`
 are all transpiled and browserified into a single JavaScript file at the root of the project, which is `index.js`. Do not modify this file as it is auto generated. Also do not modify `main.js`, which is just a bootstrap to get electron running.
 
