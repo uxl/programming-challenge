@@ -1,18 +1,37 @@
 {
-  "name": "programming-challenge",
-  "version": "1.0.0",
-  "description": "Jibo Programming Challenge",
+  "name": "jibo-programming-challenge",
+  "version": "0.1.0",
+  "description": "",
   "main": "main.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "license": "UNLICENSED",
+  "config": {
+    "watch": "src",
+    "app": "src/index.ts",
+    "bundle": "index.js",
+    "map": "index.js.map"
   },
-  "author": "Jonathan Ross",
-  "license": "MIT",
+  "scripts": {
+    "start": "npm run watch",
+    "clean": "cross-conf-env rimraf npm_package_config_bundle",
+    "build": "cross-conf-env browserify -s npm_package_name npm_package_config_app -o npm_package_config_bundle -p [tsify --target='es6'] -t [preprocessify --contextFile build/debug.json] --no-bundle-external --debug",
+    "watch": "cross-conf-env watchify  -s npm_package_name npm_package_config_app -o npm_package_config_bundle -p [tsify --target='es6'] -t [preprocessify --contextFile build/debug.json] --no-bundle-external --debug -dv"
+  },
+  "browserify": {
+    "transform": []
+  },
+  "devDependencies": {
+    "cross-conf-env": "latest",
+    "tsify": "latest",
+    "typescript": "^1.8.10",
+    "parallelshell": "latest",
+    "preprocessify": "latest",
+    "mapstraction": "latest",
+    "rimraf": "latest",
+    "watch": "latest",
+    "watchify": "latest"
+  },
   "dependencies": {
-    "babel": "^5.3.3",
-    "electron-prebuilt": "^0.26.0",
-    "react": "^0.13.3",
-    "react-bootstrap": "^0.22.0",
-    "win-spawn": "^2.0.0"
+    "electron-prebuilt": "^1.4.1",
+    "pixi.js": "^4.0.2"
   }
 }

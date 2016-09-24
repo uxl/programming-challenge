@@ -1,6 +1,6 @@
-var app = require('app');
-var BrowserWindow = require('browser-window');
-var Menu = require('menu');
+var app = require('electron').app;
+var BrowserWindow = require('electron').BrowserWindow;
+var Menu = require('electron').Menu;
 var mainWindow = null;
 var path = require('path');
 
@@ -15,6 +15,18 @@ var template = [
                     app.quit();
                 }
             },
+        ]
+    },
+    {
+        label: 'Edit',
+        submenu: [
+            {label: 'Undo', accelerator: 'Command+Z', selector: 'undo:'},
+            {label: 'Redo', accelerator: 'Command+Shift+Z', selector: 'redo:'},
+            {type: 'separator'},
+            {label: 'Cut', accelerator: 'Command+X', selector: 'cut:'},
+            {label: 'Copy', accelerator: 'Command+C', selector: 'copy:'},
+            {label: 'Paste', accelerator: 'Command+V', selector: 'paste:'},
+            {label: 'Select All', accelerator: 'Command+A', selector: 'selectAll:'}
         ]
     },
     {
@@ -49,7 +61,7 @@ app.on('ready', function () {
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 
     mainWindow = new BrowserWindow({width: 1280, height: 720, resizable: true, title: 'Jibo Programming Challenge'});
-    mainWindow.loadUrl('file://' + __dirname + '/index.html');
+    mainWindow.loadURL('file://' + __dirname + '/index.html');
     mainWindow.on('closed', function () {
         mainWindow = null;
     });
