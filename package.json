@@ -11,6 +11,7 @@
     "map": "index.js.map"
   },
   "scripts": {
+    "exe": "./node_modules/.bin/electron main.js main.js",
     "start": "npm run watch",
     "clean": "cross-conf-env rimraf npm_package_config_bundle",
     "build": "cross-conf-env browserify -s npm_package_name npm_package_config_app -o npm_package_config_bundle -p [tsify --target='es6'] -t [preprocessify --contextFile build/debug.json] --no-bundle-external --debug",
@@ -32,6 +33,6 @@
   },
   "dependencies": {
     "electron-prebuilt": "^1.4.1",
-    "pixi.js": "^4.0.2"
+    "pixi.js": "^4.3.3"
   }
 }
