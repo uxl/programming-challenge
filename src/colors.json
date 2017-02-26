@@ -1,0 +1,14 @@
+{
+    "color": {
+        "background": "0x0c0c0c",
+        "headline": "0x638f91",
+        "font": "0x638f91",
+        "squaredark": "0x161a1d",
+        "squarelight": "0x152022",
+        "buttonsolid": "0x161a1b",
+        "buttonoutline": "0xc3dae5",
+        "buttonbackground": "0x55b4c2",
+        "dot": "0xcbdee4",
+        "line": "0x425a54"
+    }
+}
