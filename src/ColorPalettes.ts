@@ -17,39 +17,24 @@ export class ColorPalettes {
     private activePalette: null;
     constructor() {
     }
-    public loadColors = function() {
+    public loadColors = function(pindex:number):Promise<any> {
+      this.paletteIndex = pindex;
         return new Promise(function(resolve, reject) {
             let url: string = 'src/colors.json';
             let xhr: any = new XMLHttpRequest();
-
-            ///GET JQUERY!!!!
-
-            //xhr.responseType = 'json';
-            //xhr.json = true,
-            // xhr.setRequestHeader('application/json', 'odata=verbose');
-            // xhr.setRequestHeader('Accept', 'application/json');
             xhr.open('GET', url);
             var data: any;
             xhr.onload =
             function() {
               if (this.status >= 200 && this.status < 300) {
                 // Success!
-                resolve(data = JSON.parse(xhr.responseText));
+                data = JSON.parse(xhr.responseText);
+                resolve(data.colors[pindex]);
               } else {
-                // We reached our target server, but it returned an error
-
+                console.log("We reached our target server, but it returned an error")
               }
             };
-            // function() {
-            //     if (this.status >= 200 && this.status < 300) {
-            //         resolve(JSON.parse(xhr.response));
-            //     } else {
-            //         reject({
-            //             status: this.status,
-            //             statusText: xhr.statusText
-            //         });
-            //     }
-            // };
+
             xhr.onerror = function() {
                 reject({
                     status: this.status,

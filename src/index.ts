@@ -5,17 +5,21 @@ import { ColorPalettes } from "./ColorPalettes";
 
 //Get color information
 const COLORLIB = new ColorPalettes;
-let currentPalette:any = {};
+let colors:any;
 
-COLORLIB.loadColors()
-.then(function (datums) {
-  console.log(datums);
-  currentPalette = datums;
-  drawScene();
-})
-.catch(function (err) {
-  console.error('Augh, there was an error!', err.statusText);
-});
+//load color paletteIndex
+let changeColors = function(pindex:number){
+  COLORLIB.loadColors(pindex)
+  .then(function (data) {
+    console.log(data);
+    colors = data;
+    drawScene();
+  })
+  .catch(function (err) {
+    console.error('Augh, there was an error!', err);
+  });
+}
+changeColors(0);
 
 //resize event
 window.onresize = function (event):void{
@@ -46,7 +50,7 @@ let drawScene = function(){
   let stage = new PIXI.Container();
 
   //Set background color
-  renderer.backgroundColor = currentPalette['background'];
+  renderer.backgroundColor = colors['background'];
   //Tell the 'renderer' to 'render' the 'stage'
   renderer.render(stage);
 };
