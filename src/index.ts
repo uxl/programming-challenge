@@ -7,7 +7,7 @@ import { ColorPalettes } from "./ColorPalettes";
 const COLORLIB = new ColorPalettes;
 let colors:any;
 
-//load color paletteIndex
+//load color palette
 let changeColors = function(pindex:number){
   COLORLIB.loadColors(pindex)
   .then(function (data) {
@@ -21,7 +21,7 @@ let changeColors = function(pindex:number){
 }
 changeColors(0);
 
-//resize event
+//Resize electron window
 window.onresize = function (event):void{
   updateRendererSize();
 }
@@ -41,7 +41,7 @@ let renderer = PIXI.autoDetectRenderer(1920,1080,
   {antialias: false, transparent: false, resolution: 1, autoResize: true}
 );
 
-//Draw scene when color is loaded
+//Draw scene
 let drawScene = function(){
   //Add the canvas to the HTML document
   document.body.appendChild(renderer.view);
