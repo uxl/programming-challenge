@@ -1,5 +1,6 @@
 {
-    "color": {
+    "colors": [
+      {
         "background": "0x0c0c0c",
         "headline": "0x638f91",
         "font": "0x638f91",
@@ -10,5 +11,17 @@
         "buttonbackground": "0x55b4c2",
         "dot": "0xcbdee4",
         "line": "0x425a54"
+    }, {
+        "background": "0x0B0B0B",
+        "headline": "0x56B3BF",
+        "font": "0xD5DBB9",
+        "squaredark": "0xF4533F",
+        "squarelight": "0xA13B2F",
+        "buttonsolid": "0x0B0B0B",
+        "buttonoutline": "0xc3dae5",
+        "buttonbackground": "0x55b4c2",
+        "dot": "0xcbdee4",
+        "line": "0x425a54"
     }
+  ]
 }
