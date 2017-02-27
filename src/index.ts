@@ -2,10 +2,14 @@
 
 import PIXI = require('pixi.js');
 import { ColorPalettes } from "./ColorPalettes";
+import { SoundEffects } from "./SoundEffects";
 
 //Get color information
 const COLORLIB = new ColorPalettes;
 let colors:any;
+
+//Get sound effects
+const SOUNDLIB = new SoundEffects;
 
 //load color palette
 let changeColors = function(pindex:number){
@@ -43,6 +47,9 @@ let renderer = PIXI.autoDetectRenderer(1920,1080,
 
 //Draw scene
 let drawScene = function(){
+  //Play startup sound
+  SOUNDLIB.play("start");
+
   //Add the canvas to the HTML document
   document.body.appendChild(renderer.view);
 
