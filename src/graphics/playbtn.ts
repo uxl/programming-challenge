@@ -1,4 +1,4 @@
-import { Howl } from "howler";
+import PIXI = require('pixi.js');
 
 export class SoundEffects {
   public sndsprite:Howl;
