@@ -11,7 +11,7 @@ let colors:any;
 let changeColors = function(pindex:number){
   COLORLIB.loadColors(pindex)
   .then(function (data) {
-    console.log(data);
+    console.log(data.type);
     colors = data;
     drawScene();
   })

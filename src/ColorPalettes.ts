@@ -1,15 +1,4 @@
-interface palette {
-    background: number,
-    headline: number,
-    font: number,
-    squaredark: number,
-    squarelight: number,
-    buttonsolid: number,
-    buttonoutline: number,
-    buttonbackground: number,
-    dot: number,
-    line: number
-}
+import {IPalette} from './interfaces/IPalette';
 
 export class ColorPalettes {
     private paletteIndex: 0;
@@ -29,7 +18,8 @@ export class ColorPalettes {
               if (this.status >= 200 && this.status < 300) {
                 // Success!
                 data = JSON.parse(xhr.responseText);
-                resolve(data.colors[pindex]);
+                let activePalette:IPalette = data.colors[pindex];
+                resolve(activePalette);
               } else {
                 console.log("We reached our target server, but it returned an error")
               }
@@ -44,50 +34,4 @@ export class ColorPalettes {
             xhr.send();
         });
     }
-
-    // public loadColors = function():any {
-    //     var req = new XMLHttpRequest;
-    //     let url: string = 'src/colors.json';
-    //     req.overrideMimeType("application/json");
-    //     req.open('GET', url, true);
-    //     var target = this;
-    //     req.onload = function() { target.parseJSON(req, url) };
-    //     req.send(null);
-    // }
-    // parseJSON = function(req, url): object {
-    //     if (req.status == 200) {
-    //         this.palettes = JSON.parse(req.responseText);
-    //         return this.palettes[this.activePalette];
-    //     }
-    // }
-    // changePalette = function(index: number): void {
-    //     console.log("changePalette");
-    //     this.paletteIndex = index;
-    //     this.getPalette();
-    // }
 }
-
-
-        //return this.colorLibrary[this.paletteIndex];
-
-
-        // console.log('index: ' + colors);
-        // let colors: palette = JSON.parse(data);
-        // console.log('colors: ' + colors[index]);
-        // return colors[index];
-
-// = (function (e) {
-//            return function() {
-            //  console.log("json loaded1: " + this.colorLibrary);
-            //  this.colorLibrary = JSON.parse(this.responseText);
-            //  console.log("json loaded2: " + this.colorLibrary);
-//
-//              this.changePalette(0);
-//            }
-//        }(this));
-
-
-
-// let colors: palette[] = [];
-
-// let currentScheme: number;
