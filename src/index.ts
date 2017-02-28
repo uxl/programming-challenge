@@ -83,13 +83,7 @@ let setupPixi = function():void{
 //Draw scene
 let drawScene = function(){
 
-  //single object test
-  var bluearrow = new PIXI.Sprite(
-      PIXI.loader.resources["src/graphics/arrow_blue.png"].texture
-    );
-    stage.addChild(bluearrow);
-    bluearrow.position.x = 200;
-    bluearrow.position.y = 200;
+
 
     //init Gui pass in colors
     OVERLAY = new Gui( stage, colors, SOUNDLIB);
