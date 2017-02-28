@@ -74,9 +74,6 @@ let setupPixi = function():void{
   //Update background color
   renderer.backgroundColor = colors['background'];
 
-  //Play startup sound
-  SOUNDLIB.play("start");
-
   drawScene();
 }
 

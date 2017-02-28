@@ -7,10 +7,10 @@ export class SoundEffects {
       this.sndsprite = new Howl({
       src: ['src/audio/sprite.wav'],
       sprite: {
-        start: [0, 3000],
+        start: [212, 1664],
         dot: [4000, 1000],
         line: [6000, 5000],
-        keypress: [6000, 5000],
+        keypress: [10, 54],
         error: [6000, 5000],
         move: [6000, 5000]
       }

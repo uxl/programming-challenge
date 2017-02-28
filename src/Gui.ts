@@ -33,7 +33,7 @@ export class Gui {
                 newSprites.arrow.position.x = 200;
                 newSprites.arrow.position.y = 200;
 
-                drawGrid(newStage, resources);
+                drawGrid(newStage, resources, 10, 10, 65);
             });
     }
     private drawArrow = function() {
@@ -43,16 +43,23 @@ export class Gui {
         this.sprites.arrow.position.x = 200;
         this.sprites.arrow.position.y = 200;
     }
-    private drawGrid = function(newStage, resources): void {
-        for (let i = 0; i < 100; i++) {
+    private drawGrid = function(newStage:any, resources:any, rows:number, cols:number, spacing:number): void {
+      var container = new PIXI.Container();
+      newStage.addChild(container);
+        let totalmarks = rows * cols;
+        for (let i = 0; i < totalmarks; i++) {
             let mark = new PIXI.Sprite(resources.mark.texture);
             mark.anchor.set(0.5);
-            mark.x = (i % 10) * 100;
-            mark.y = Math.floor(i / 10) * 100;
+            mark.x = (i % cols) * spacing;
+            mark.y = Math.floor(i / rows) * spacing;
             mark.scale.x = 1;
             mark.scale.y = 1;
-            newStage.addChild(mark);
+            container.addChild(mark);
         }
+
+        // Center on the screen
+      container.x = (newStage.width - container.width) / 2;
+      container.y = (newStage.height - container.height) / 2;
     }
     /*
     private createButton = function(): void {
@@ -137,7 +144,7 @@ export class Gui {
         this.line = new PIXI.Graphics();
 
         // set a fill and line style
-        this.line.lineStyle(1, this.colors.line, 1);
+        this.line.lineStyle(0.5, this.colors.line, 0.5);
 
         // draw a shape
         this.line.moveTo(100, window.innerHeight - 70);
@@ -166,8 +173,8 @@ export class Gui {
         });
 
         this.status = new PIXI.Text('...', style);
-        this.status.x = 20;
-        this.status.y = window.innerHeight - 60;
+        this.status.x = 110;
+        this.status.y = window.innerHeight - 50;
 
         this.stage.addChild(this.status);
         this.typeMe(this.status, "Initializing...", 0);
@@ -194,8 +201,11 @@ export class Gui {
         // console.log(newString);
 
         if (messageLength < message.length + 1) {
-            setTimeout(this.typeMe.bind(this, textObj, message, messageLength), 100);
+            setTimeout(this.typeMe.bind(this, textObj, message, messageLength), 50);
             // setTimeout(this.declare.bind(this), 1000);
+        }else{
+          //Play startup sound
+          this.sounds.play("start");
         }
     }
 }
