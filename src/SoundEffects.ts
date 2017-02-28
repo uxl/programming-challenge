@@ -10,7 +10,7 @@ export class SoundEffects {
         start: [0, 3000],
         dot: [4000, 1000],
         line: [6000, 5000],
-        typing: [6000, 5000],
+        keypress: [6000, 5000],
         error: [6000, 5000],
         move: [6000, 5000]
       }

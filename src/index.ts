@@ -3,17 +3,17 @@
 import PIXI = require('pixi.js');
 import { ColorPalettes } from "./ColorPalettes";
 import { SoundEffects } from "./SoundEffects";
-import { Playbtn } from "./graphics/playbtn";
+import { Gui } from "./Gui";
+
+//Get sound effects
+const SOUNDLIB = new SoundEffects;
 
 //Get color information
 const COLORLIB = new ColorPalettes;
 let colors:any;
 
-//Get sound effects
-const SOUNDLIB = new SoundEffects;
-
-const play_button = new Playbtn;
-
+// Load Gui after colors
+let OVERLAY:any;
 
 //load color palette
 let changeColors = function(pindex:number){
@@ -55,6 +55,7 @@ let playButtonOver;
 let playButton;
 
 let setupPixi = function():void{
+
   renderer = PIXI.autoDetectRenderer(960,540,
     {antialias: true, transparent: false, resolution: 1, autoResize: true}
   );
@@ -76,22 +77,7 @@ let setupPixi = function():void{
   //Play startup sound
   SOUNDLIB.play("start");
 
-  //load images
-  PIXI.loader
-    .add([
-      "src/graphics/arrow_blue.png",
-      "src/graphics/arrow_yellow.png",
-      "src/graphics/arrow_orange.png",
-      "src/graphics/mark_bracket.png",
-      "src/graphics/mark_dot.png",
-      "src/graphics/mark_both.png",
-      "src/graphics/arrow_wait.png",
-      "src/graphics/arrow_press.png",
-      "src/graphics/arrow_error.png"
-
-    ])
-    .load(drawScene);
-
+  drawScene();
 }
 
 //Draw scene
@@ -105,76 +91,14 @@ let drawScene = function(){
     bluearrow.position.x = 200;
     bluearrow.position.y = 200;
 
-
-    playButtonWait = PIXI.loader.resources["src/graphics/arrow_wait.png"].texture;
-    playButtonDown = PIXI.loader.resources["src/graphics/arrow_error.png"].texture;
-    playButtonOver = PIXI.loader.resources["src/graphics/arrow_press.png"].texture;
-
-    playButton = new PIXI.Sprite(playButtonWait);
-
-    playButton.anchor.set(0.5);
-    playButton.x = 500;
-    playButton.y = 400;
-
-    // make the playButton interactive...
-    playButton.interactive = true;
-    playButton.buttonMode = true;
-
-    playButton
-       // Mouse & touch events are normalized into
-       // the pointer* events for handling different
-       // button events.
-       .on('pointerdown', onButtonDown)
-       .on('pointerup', onButtonUp)
-       .on('pointerupoutside', onButtonUp)
-       .on('pointerover', onButtonOver)
-       .on('pointerout', onButtonOut);
-
-       stage.addChild(playButton);
-       // make the playButton interactive...
-       playButton.interactive = true;
-       playButton.buttonMode = true;
-
-  //grid test
-  // // Create a 5x5 grid
-  for (var i = 0; i < 100; i++) {
-      var mark = new PIXI.Sprite(PIXI.loader.resources["src/graphics/mark_bracket.png"].texture);
-      mark.anchor.set(0.5);
-      mark.x = (i % 10) * 100;
-      mark.y = Math.floor(i / 10) * 100;
-      mark.scale.x = 1;
-      mark.scale.y = 1;
-      stage.addChild(mark);
-    }
-
-    //Tell the 'app' to 'render' the 'stage'
-    renderer.render(stage);
+    //init Gui pass in colors
+    OVERLAY = new Gui( stage, colors, SOUNDLIB);
+    //start rendering engine
+    gameLoop();
 };
-function onButtonDown() {
-  console.log("buttondown");
-    this.isdown = true;
-    playButton.setTexture = playButtonOver;
-    this.alpha = 1;
-}
+let gameLoop = function():void{
+  //loop 60 frames per second
+  requestAnimationFrame(gameLoop);
 
-function onButtonUp() {
-    this.isdown = false;
-    this.texture = playButtonWait;
-}
-
-function onButtonOver() {
-  console.log("buttonover");
-
-    this.isOver = true;
-    this.texture = playButtonOver;
-    this.alpha = 1;
-
-}
-
-function onButtonOut() {
-    this.isOver = false;
-    if (this.isdown) {
-        return;
-    }
-    this.texture = playButtonWait;
+  renderer.render(stage);
 }
