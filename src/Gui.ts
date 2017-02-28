@@ -4,10 +4,20 @@ export class Gui {
     private stage: PIXI.Container;
     private colors: any;
     private sounds: any;
+
+    //text elements
     private status: PIXI.Text;
+    private rowsTitle: PIXI.Text;
+    private rowsValue: PIXI.Text;
+    private colsTitle: PIXI.Text;
+    private colsValue: PIXI.Text;
+
     private line: PIXI.Graphics;
     private loader = new PIXI.loaders.Loader();
     private sprites: any = {};
+
+    private rows:number = 10;
+    private cols:number = 10;
 
     constructor(mainStage: PIXI.Container, mainColors: any, mainSounds: any) {
         this.stage = mainStage;
@@ -21,6 +31,8 @@ export class Gui {
         var newSprites: any = {};
         var newStage: PIXI.Container = this.stage;
         var drawGrid = this.drawGrid;
+        var rows = this.rows;
+        var cols = this.cols;
         //load images
         this.loader = PIXI.loader
             .add('arrowblue', 'src/graphics/arrow_blue.png')
@@ -33,7 +45,7 @@ export class Gui {
                 newSprites.arrow.position.x = 200;
                 newSprites.arrow.position.y = 200;
 
-                drawGrid(newStage, resources, 10, 10, 65);
+                drawGrid(newStage, resources, rows, cols, 65);
             });
     }
     private drawArrow = function() {
@@ -61,7 +73,6 @@ export class Gui {
       container.x = (newStage.width - container.width) / 2;
       container.y = (newStage.height - container.height) / 2;
     }
-    /*
     private createButton = function(): void {
         // create some textures from an image path
         var textureButton = this.graphics.loader.resources["src/graphics/arrow_wait.png"].texture;
@@ -138,7 +149,6 @@ export class Gui {
         }
 
     }
-    */
 
     private createLine = function(): void {
         this.line = new PIXI.Graphics();
@@ -171,27 +181,60 @@ export class Gui {
             wordWrap: true,
             wordWrapWidth: 440
         });
-
+        //status
         this.status = new PIXI.Text('...', style);
         this.status.x = 110;
         this.status.y = window.innerHeight - 50;
 
         this.stage.addChild(this.status);
-        this.typeMe(this.status, "Initializing...", 0);
+        this.typeMe(this.status, "Initializing...", 0, 2000);
+
+        //rows title
+        this.rowsTitle = new PIXI.Text('...', style);
+        this.rowsTitle.x = 300;
+        this.rowsTitle.y = window.innerHeight - 50;
+
+        this.stage.addChild(this.rowsTitle);
+        this.typeMe(this.rowsTitle, "rows:", 0, 3500);
+
+        console.log(this.cols);
+        console.log(typeof this.cols);
+        // //rows value
+        this.rowsValue = new PIXI.Text('...', style);
+        this.rowsValue.x = 350;
+        this.rowsValue.y = window.innerHeight - 50;
+
+        this.stage.addChild(this.rowsValue);
+        this.typeMe(this.rowsValue, this.rows.toString(), 0, 4000);
+        //
+        //cols title
+        this.colsTitle = new PIXI.Text('...:', style);
+        this.colsTitle.x = 500;
+        this.colsTitle.y = window.innerHeight - 50;
+
+        this.stage.addChild(this.colsTitle);
+        this.typeMe(this.colsTitle, 'cols:', 0, 4500);
+        //
+        // //cols value
+        this.colsValue = new PIXI.Text('...', style);
+        this.colsValue.x = 550;
+        this.colsValue.y = window.innerHeight - 50;
+
+        this.stage.addChild(this.colsValue);
+        this.typeMe(this.colsValue, this.cols.toString(), 0, 5000);
+        this.typeMe(this.status, "Ready", 0, 6000);
+
     }
     // public updateText = function(message: string): PIXI.Text {
     //     this.status.text = message;
     //     return this.status;
     // }
-    private typeMe = function(textObj: PIXI.Text, message: string, messageLength: number): void {
+    private typeMe = function(textObj: PIXI.Text, message: string, messageLength: number, delay: number): void {
         // console.log(message + ' | ' + messageLength);
         if (messageLength === undefined) {
             // console.log("starting type");
-            // textObj.text = '';
+            textObj.text = "";
             messageLength = 0;
-        } else {
-            //increment length of message
-            messageLength++;
         }
 
         //loop through typing
@@ -199,13 +242,15 @@ export class Gui {
         textObj.text = newString;
         this.sounds.play("keypress");
         // console.log(newString);
+        //increment length of message
+        messageLength++;
 
         if (messageLength < message.length + 1) {
-            setTimeout(this.typeMe.bind(this, textObj, message, messageLength), 50);
+            setTimeout(this.typeMe.bind(this, textObj, message, messageLength, 50), delay);
             // setTimeout(this.declare.bind(this), 1000);
         }else{
           //Play startup sound
-          this.sounds.play("start");
+
         }
     }
 }

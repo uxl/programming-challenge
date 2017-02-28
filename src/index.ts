@@ -80,8 +80,6 @@ let setupPixi = function():void{
 //Draw scene
 let drawScene = function(){
 
-
-
     //init Gui pass in colors
     OVERLAY = new Gui( stage, colors, SOUNDLIB);
     //start rendering engine
