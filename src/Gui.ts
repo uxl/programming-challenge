@@ -58,7 +58,7 @@ export class Gui {
         this.createButtons();
     }
     private createButtons = function(){
-      var rowsButton = new Btn(this.stage, this.sprites, "arrowup", 100, 100, function(){
+      var rowsButton = new Btn(this.stage, this.sprites, "arrowup", 200, window.innerHeight - 50, function(){
         this.rows++;
         this.typeMe(this.rowsValue, this.rows.toString(),0,0)
         //update board/matrix
