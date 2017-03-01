@@ -19,7 +19,6 @@ let OVERLAY:any;
 let changeColors = function(pindex:number){
   COLORLIB.loadColors(pindex)
   .then(function (data) {
-    console.log(data.type);
     colors = data;
     setupPixi();
   })
@@ -45,8 +44,8 @@ changeColors(0);
 // }
 
 //Create the app
-let renderer;
-let stage;
+let renderer: any;
+let stage: PIXI.Container;
 
 //button
 let playButtonWait;
@@ -79,11 +78,11 @@ let setupPixi = function():void{
 
 //Draw scene
 let drawScene = function(){
-
     //init Gui pass in colors
     OVERLAY = new Gui( stage, colors, SOUNDLIB);
     //start rendering engine
     gameLoop();
+    console.log("started gameLoop");
 };
 let gameLoop = function():void{
   //loop 60 frames per second

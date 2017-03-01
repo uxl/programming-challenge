@@ -4,16 +4,22 @@ export class Btn {
     private buttonObject: Object = {};
     private name: String;
     private callback:Function;
-    constructor(newStage: any, resources: any, btnkind: string, xpos: number, ypos: number, callbk:Function) {
+    private stage:PIXI.Container;
+    private sprites:PIXI.Sprite;
+
+    constructor(mainStage:any, sprites:any, btnkind: string, xpos: number, ypos: number, callbk:Function) {
         // create some textures from an image path
+        this.stage = mainStage;
         this.name = btnkind;
         this.callback = callbk;
-        console.log("btnname: " + this.name);
-        this.buttonObject[this.name + "_up"] = new PIXI.Sprite(resources[this.name + "_up"].texture);
-        this.buttonObject[this.name + "_over"] = new PIXI.Sprite(resources[this.name + "_over"].texture);
-        this.buttonObject[this.name + "_hit"] = new PIXI.Sprite(resources[this.name + "_hit"].texture);
+        this.sprites = sprites;
 
-        this.buttonObject['textureButton'] = new PIXI.Sprite(resources[this.name + "_up"].texture);
+        console.log("btnname: " + this.name);
+        this.buttonObject[this.name + "_up"] = this.sprites[this.name + "_up"];
+        this.buttonObject[this.name + "_over"] = this.sprites[this.name + "_over"];
+        this.buttonObject[this.name + "_hit"] = this.sprites[this.name + "_hit"];
+
+        this.buttonObject['textureButton'] = this.sprites[this.name + "_up"];
         this.buttonObject['textureButton'].anchor.set(0.5);
         this.buttonObject['textureButton'].x = xpos;
         this.buttonObject['textureButton'].y = ypos;
@@ -44,7 +50,7 @@ export class Btn {
         // .on('touchendoutside', onButtonUp)
 
         // add it to the stage
-        newStage.addChild(this.buttonObject['textureButton']);
+        this.stage.addChild(this.buttonObject['textureButton']);
     }
     private onButtonDown = function(me,callback): void {
         console.log("onButtonDown");

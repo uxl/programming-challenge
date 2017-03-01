@@ -15,21 +15,21 @@ export class Gui {
 
     private line: PIXI.Graphics;
     private loader = new PIXI.loaders.Loader();
-    private sprites:any = {};
+    private sprites: any = {};
 
-    private rows:number = 10;
-    private cols:number = 10;
-    private resources:any;
-
-    private player:PIXI.Sprite;
+    private rows: number = 10;
+    private cols: number = 10;
+    private spacing: number = 50;
+    private resources: any;
+    private gridcontainer: any;
+    private marks: any = [];
+    private player: PIXI.Sprite;
 
     constructor(mainStage: PIXI.Container, mainColors: any, mainSounds: any) {
         this.stage = mainStage;
         this.colors = mainColors;
         this.sounds = mainSounds;
         this.loadImages();
-        this.createLine();
-        this.createText();
     }
     private loadImages = function(): void {
         //load images'
@@ -39,54 +39,66 @@ export class Gui {
             .add('arrowup_up', 'src/graphics/arrowup_up.png')
             .add('arrowup_over', 'src/graphics/arrowup_over.png')
             .add('arrowup_hit', 'src/graphics/arrowup_hit.png')
-            .on('complete', function (loader, resources) {
-              this.sprites.player_blue = new PIXI.Sprite(resources.player_blue.texture);
-              this.sprites.mark_bracket = new PIXI.Sprite(resources.mark_bracket.texture);
-              this.sprites.arrowup_up = new PIXI.Sprite(resources.arrowup_up.texture);
-              this.sprites.arrowup_over = new PIXI.Sprite(resources.arrowup_over.texture);
-              this.sprites.arrowup_up = new PIXI.Sprite(resources.arrowup_up.texture);
-              this.createPlayer();
-          },this);
-          this.loader.load();
+            .on('complete', function(loader, resources) {
+                this.sprites.player_blue = new PIXI.Sprite(resources.player_blue.texture);
+                this.sprites.mark_bracket = new PIXI.Sprite(resources.mark_bracket.texture);
+                this.sprites.arrowup_up = new PIXI.Sprite(resources.arrowup_up.texture);
+                this.sprites.arrowup_over = new PIXI.Sprite(resources.arrowup_over.texture);
+                this.sprites.arrowup_up = new PIXI.Sprite(resources.arrowup_up.texture);
+                this.onLoadCompleted();
+            }.bind(this));
+        this.loader.load();
+    }
+
+
+    private onLoadCompleted = function() {
+        this.createGrid();
+        this.createLine();
+        this.createText();
+        this.createButtons();
+    }
+    private createButtons = function(){
+      var rowsButton = new Btn(this.stage, this.sprites, "arrowup", 100, 100, function(){
+        this.rows++;
+        this.typeMe(this.rowsValue, this.rows.toString(),0,0)
+        //update board/matrix
+
+      }.bind(this));
+    }
+    private createPlayer = function(): void {
+        //player
+        this.player = this.sprites.player_blue;
+        this.stage.addChild(this.player);
+        this.player.position.x = 500;
+        this.player.position.y = 500;
+        this.sounds.play("start");
 
     }
-    private createPlayer(){
-      //player
-      this.player = this.sprites.player_blue;
-      this.stage.addChild(this.player);
-      this.player.position.x = 500;
-      this.player.position.y = 500;
-    }
-    // private createButtons = function(){
-    //   var rowsButton = new Btn(newStage, resources, "arrowup", 700, 500, function(){
-    //     console.log("callback: " + rows);
-    //     // rows++;
-    //     // this.typeMe(newStage.getChildByName('rowsValue'), rows, 0, 0);
-    //   })
-    // }
-    private onLoadCompleted = function(newResources:any,me){
+    private createGrid = function() {
+        var container = new PIXI.Container();
+        this.stage.addChild(container);
 
-      console.log(me);
-      console.log(newResources);
-      this.resoruces = newResources;
-    }
-    private drawGrid = function(newStage:any, resources:any, rows:number, cols:number, spacing:number): void {
-      var container = new PIXI.Container();
-      newStage.addChild(container);
-        let totalmarks = rows * cols;
-        for (let i = 0; i < totalmarks; i++) {
-            let mark = new PIXI.Sprite(resources.mark_bracket.texture);
+        let totalmarks = this.rows * this.cols;
+        console.log(totalmarks);
+        for (var i = 0; i < totalmarks; i++) {
+          // console.log(;
+          // console.log("x: " + Math.floor(i * this.rows) * this.spacing + "y: " + (i % this.cols) * this.spacing););
+            var mark = this.sprites.mark_bracket;
+            container.addChild(mark);
+
             mark.anchor.set(0.5);
-            mark.x = (i % cols) * spacing;
-            mark.y = Math.floor(i / rows) * spacing;
+            mark.x = (i % this.cols) * this.spacing;//(i % this.cols) * this.spacing;
+            mark.y = Math.floor(i / this.rows) * this.spacing; //(i % this.cols) * this.spacing;
+            // bunny.x = (i % 5) * 40;
+            // bunny.y = Math.floor(i / 5) * 40;            mark.y = Math.floor(i / this.rows) * this.spacing;
             mark.scale.x = 1;
             mark.scale.y = 1;
-            container.addChild(mark);
         }
 
         // Center on the screen
-      container.x = (newStage.width - container.width) / 2;
-      container.y = (newStage.height - container.height) / 2;
+        container.x = (this.stage.width - container.width) / 2;
+        container.y = (this.stage.height - container.height) / 2;
+        this.createPlayer();
     }
 
     private createLine = function(): void {
@@ -191,7 +203,9 @@ export class Gui {
         //loop through typing
         let newString: string = message.substring(0, messageLength);
         textObj.text = newString;
-        this.sounds.play("keypress");
+        if (messageLength > 1) {
+            this.sounds.play("keypress");
+        }
         // console.log(newString);
         //increment length of message
         messageLength++;
@@ -199,9 +213,7 @@ export class Gui {
         if (messageLength < message.length + 1) {
             setTimeout(this.typeMe.bind(this, textObj, message, messageLength, 50), delay);
             // setTimeout(this.declare.bind(this), 1000);
-        }else{
-          //Play startup sound
-
         }
+
     }
 }
