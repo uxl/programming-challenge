@@ -39,12 +39,18 @@ export class Gui {
             .add('arrowup_up', 'src/graphics/arrowup_up.png')
             .add('arrowup_over', 'src/graphics/arrowup_over.png')
             .add('arrowup_hit', 'src/graphics/arrowup_hit.png')
+            .add('arrowdown_up', 'src/graphics/arrowdown_up.png')
+            .add('arrowdown_over', 'src/graphics/arrowdown_over.png')
+            .add('arrowdown_hit', 'src/graphics/arrowdown_hit.png')
             .on('complete', function(loader, resources) {
                 this.sprites.player_blue = new PIXI.Sprite(resources.player_blue.texture);
                 this.sprites.mark_bracket = new PIXI.Sprite(resources.mark_bracket.texture);
                 this.sprites.arrowup_up = new PIXI.Sprite(resources.arrowup_up.texture);
                 this.sprites.arrowup_over = new PIXI.Sprite(resources.arrowup_over.texture);
-                this.sprites.arrowup_up = new PIXI.Sprite(resources.arrowup_up.texture);
+                this.sprites.arrowup_hit = new PIXI.Sprite(resources.arrowup_up.texture);
+                this.sprites.arrowdown_up = new PIXI.Sprite(resources.arrowdown_up.texture);
+                this.sprites.arrowdown_over = new PIXI.Sprite(resources.arrowdown_over.texture);
+                this.sprites.arrowdown_hit = new PIXI.Sprite(resources.arrowdown_up.texture);
                 this.onLoadCompleted();
             }.bind(this));
         this.loader.load();
@@ -58,9 +64,27 @@ export class Gui {
         this.createButtons();
     }
     private createButtons = function(){
-      var rowsButton = new Btn(this.stage, this.sprites, "arrowup", 200, window.innerHeight - 50, function(){
+      var rowsButtonUp = new Btn(this.stage, this.sprites, "arrowup", 405, window.innerHeight - 40, function(){
         this.rows++;
         this.typeMe(this.rowsValue, this.rows.toString(),0,0)
+        //update board/matrix
+
+      }.bind(this));
+      var rowsButtonDown = new Btn(this.stage, this.sprites, "arrowdown", 400, window.innerHeight - 25, function(){
+        this.rows--;
+        this.typeMe(this.rowsValue, this.rows.toString(),0,0)
+        //update board/matrix
+
+      }.bind(this));
+      var colsButtonUp = new Btn(this.stage, this.sprites, "arrowup", 505, window.innerHeight - 40, function(){
+        this.cols++;
+        this.typeMe(this.colsValue, this.cols.toString(),0,0)
+        //update board/matrix
+
+      }.bind(this));
+      var colsButtonDown = new Btn(this.stage, this.sprites, "arrowdown", 500, window.innerHeight - 25, function(){
+        this.cols--;
+        this.typeMe(this.colsValue, this.cols.toString(),0,0)
         //update board/matrix
 
       }.bind(this));
@@ -203,7 +227,7 @@ export class Gui {
         //loop through typing
         let newString: string = message.substring(0, messageLength);
         textObj.text = newString;
-        if (messageLength > 1) {
+        if (messageLength >= 1) {
             this.sounds.play("keypress");
         }
         // console.log(newString);
