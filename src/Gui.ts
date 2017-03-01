@@ -107,6 +107,7 @@ export class Gui {
 
     }
     private createGrid = function(rows,cols) {
+        this.algorithm.createGrid();
         var container = new PIXI.Container();
         this.stage.addChild(container);
 

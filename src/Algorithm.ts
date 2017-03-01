@@ -1,26 +1,66 @@
+import { SinglyLinkedList } from "./SinglyLinkedList";
+
+
 export class Algorithm {
 
   //define size of checkerboard
-  private _rows:number = 10; //<ui defined>;
-  private _cols:number = 10; //<ui defined>;
+  private singlylist = new SinglyLinkedList();
+  private _rows:number = 10;
+  private _cols:number = 10;
   private _spacing:number = 10; //row vs col => row.width * rows; min:2px max: 50px;
+
+  private grid:Object = {};
 
   constructor(){
 
   }
+
   get rows():number {
       return this._rows;
   }
   set rows(newval:number) {
       this._rows = newval;
+      console.log("row updated: " + this._rows);
   }
   get cols():number {
       return this._cols;
   }
   set cols(newval:number) {
       this._cols = newval;
+      console.log("cols updated: " + this._cols);
   }
 
+  public reset = function(){
+    //createGrid
+    var grid = this.createGrid();
+    //pick random starting position
+    var randomStart = this.randomStart();
+    //build linked list
+    var head = grid[randomStart];
+
+  }
+
+
+  public createGrid = function(){
+    let amount = this._rows * this._cols;
+    let direction = Math.floor(Math.random()*4);
+    let grid: object[] = [];
+    for (var i = 0; i < amount; i++) {
+      var cell = {x:(i % this._cols), y: Math.floor(i / this._rows), direction:direction};
+      grid.push(cell);
+    }
+    console.log(grid);
+    // return grid;
+  }
+  public randomStart = function(){
+    let amount = this._rows * this._cols;
+    return Math.floor(Math.random()*amount);
+  }
+  // private ranVector = function(-1, 1) {
+  //   let x = Math.floor(Math.random() * (max - min + 1)) + min;
+  //   let y = Math.floor(Math.random() * (max - min + 1)) + min;
+  //   return {x,y}; (0,1)
+  // }
   private Node = function(data, next) {
     this.data = data;
     this.next = next;
@@ -30,12 +70,8 @@ export class Algorithm {
     this.head = null;
   }
 
-  //A Singly-Linked List
-  //In computer science, a singly-linked list is a data structure
-  //that holds a sequence of linked nodes. Each node, in turn, contains data and a pointer, which can point to another node.
-  private SinglyLinkedList = function(){
 
-  }
+
 
 
 //move to gui

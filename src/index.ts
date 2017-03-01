@@ -10,10 +10,10 @@ const SOUNDLIB = new SoundEffects;
 
 //Get color information
 const COLORLIB = new ColorPalettes;
-let colors:any;
+let colors:ColorPalettes;
 
 // Load Gui after colors
-let OVERLAY:any;
+let maingui:any;
 
 //load color palette
 let changeColors = function(pindex:number){
@@ -27,21 +27,6 @@ let changeColors = function(pindex:number){
   });
 }
 changeColors(0);
-
-// //Resize electron window
-// window.onresize = function (event):void{
-//   updateRendererSize();
-// }
-// //Handles update of Canvas and Elements
-// let updateRendererSize = function():void{
-//   let w = window.innerWidth;
-//   let h = window.innerHeight;
-//   //this part resizes the canvas but keeps ratio the same
-//   // app.view.style.width = w + "px";
-//   // app.view.style.height = h + "px";
-//   //this part adjusts the ratio:
-//   renderer.resize(w,h);
-// }
 
 //Create the app
 let renderer: any;
@@ -79,7 +64,7 @@ let setupPixi = function():void{
 //Draw scene
 let drawScene = function(){
     //init Gui pass in colors
-    OVERLAY = new Gui( stage, colors, SOUNDLIB);
+    maingui = new Gui( stage, colors, SOUNDLIB);
     //start rendering engine
     gameLoop();
     console.log("started gameLoop");
@@ -90,3 +75,19 @@ let gameLoop = function():void{
 
   renderer.render(stage);
 }
+
+
+// //Resize electron window
+// window.onresize = function (event):void{
+//   updateRendererSize();
+// }
+// //Handles update of Canvas and Elements
+// let updateRendererSize = function():void{
+//   let w = window.innerWidth;
+//   let h = window.innerHeight;
+//   //this part resizes the canvas but keeps ratio the same
+//   // app.view.style.width = w + "px";
+//   // app.view.style.height = h + "px";
+//   //this part adjusts the ratio:
+//   renderer.resize(w,h);
+// }
