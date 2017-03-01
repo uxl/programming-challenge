@@ -3,12 +3,16 @@ import * as PIXI from "pixi.js";
 export class Btn {
     private buttonObject: Object = {};
     private name: String;
-    constructor(newStage: any, resources: any, btnkind: string, xpos: number, ypos: number) {
+    private callback:Function;
+    constructor(newStage: any, resources: any, btnkind: string, xpos: number, ypos: number, callbk:Function) {
         // create some textures from an image path
         this.name = btnkind;
+        this.callback = callbk;
+        console.log("btnname: " + this.name);
         this.buttonObject[this.name + "_up"] = new PIXI.Sprite(resources[this.name + "_up"].texture);
         this.buttonObject[this.name + "_over"] = new PIXI.Sprite(resources[this.name + "_over"].texture);
         this.buttonObject[this.name + "_hit"] = new PIXI.Sprite(resources[this.name + "_hit"].texture);
+
         this.buttonObject['textureButton'] = new PIXI.Sprite(resources[this.name + "_up"].texture);
         this.buttonObject['textureButton'].anchor.set(0.5);
         this.buttonObject['textureButton'].x = xpos;
@@ -21,11 +25,11 @@ export class Btn {
         // Mouse & touch events are normalized into
         // the pointer* events for handling different
         this.buttonObject['textureButton']
-            .on('pointerdown', this.onButtonDown)
-            .on('pointerup', this.onButtonUp)
-            .on('pointerupoutside', this.onButtonUp)
-            .on('pointerover', this.onButtonOver)
-            .on('pointerout', this.onButtonOut);
+            .on('pointerdown', this.onButtonDown.bind(this, this.name, this.callback))
+            .on('pointerup', this.onButtonUp.bind(this, this.name))
+            .on('pointerupoutside', this.onButtonUp.bind(this, this.name))
+            .on('pointerover', this.onButtonOver.bind(this, this.name))
+            .on('pointerout', this.onButtonOut.bind(this, this.name));
 
         // Use mouse-only events
         // .on('mousedown', onButtonDown)
@@ -42,36 +46,37 @@ export class Btn {
         // add it to the stage
         newStage.addChild(this.buttonObject['textureButton']);
     }
-    private onButtonDown = function(): void {
+    private onButtonDown = function(me,callback): void {
         console.log("onButtonDown");
-        this.buttonObject['textureButton'].isdown = true;
-        this.buttonObject['textureButton'].texture = this.buttonObject[this.name + "_hit"];
-        this.buttonObject['textureButton'].alpha = 1;
+        this.isdown = true;
+        this.texture = this.buttonObject[me + "_hit"];
+        this.alpha = 1;
+        callback();
     }
-    private onButtonUp = function(): void {
+    private onButtonUp = function(me): void {
         console.log("onButtonUp");
-        this.buttonObject['textureButton'].isdown = false;
-        if (this.buttonObject['textureButton'].isOver) {
-            this.buttonObject['textureButton'].texture = this.buttonObject[this.name + "_over"];
+        this.isdown = false;
+        if (this.isOver) {
+            this.texture = this.buttonObject[me + "_over"];
         }
         else {
-            this.buttonObject['textureButton'].texture = this.buttonObject[this.name + "_up"];
+            this.texture = this.buttonObject[me + "_up"];
         }
     }
-    private onButtonOver = function(): void {
+    private onButtonOver = function(me): void {
         console.log("onButtonOver");
-        this.buttonObject['textureButton'].isOver = true;
-        if (this.buttonObject['textureButton'].isdown) {
+        this.isOver = true;
+        if (this.isdown) {
             return;
         }
-        this.buttonObject['textureButton'].texture = this.buttonObject[this.name + "_over"];
+        this.texture = this.buttonObject[me + "_over"];
     }
-    private onButtonOut = function(): void {
+    private onButtonOut = function(me): void {
         console.log("onButtonOut");
-        this.buttonObject['textureButton'].isOver = false;
-        if (this.buttonObject['textureButton'].isdown) {
+        this.isOver = false;
+        if (this.isdown) {
             return;
         }
-        this.buttonObject['textureButton'].texture = this.buttonObject[this.name + "_up"];
+        this.texture = this.buttonObject[me + "_up"];
     }
 }

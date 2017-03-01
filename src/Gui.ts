@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { Btn } from "./Btn";
 
 export class Gui {
     private stage: PIXI.Container;
@@ -14,10 +15,13 @@ export class Gui {
 
     private line: PIXI.Graphics;
     private loader = new PIXI.loaders.Loader();
-    private sprites: any = {};
+    private sprites:any = {};
 
     private rows:number = 10;
     private cols:number = 10;
+    private resources:any;
+
+    private player:PIXI.Sprite;
 
     constructor(mainStage: PIXI.Container, mainColors: any, mainSounds: any) {
         this.stage = mainStage;
@@ -28,27 +32,43 @@ export class Gui {
         this.createText();
     }
     private loadImages = function(): void {
-        var newSprites: any = {};
-        var newStage: PIXI.Container = this.stage;
-        var drawGrid = this.drawGrid;
-        var rows:number = this.rows;
-        var cols:number = this.cols;
-        //load images
+        //load images'
         this.loader = PIXI.loader
             .add('player_blue', 'src/graphics/player_blue.png')
             .add('mark_bracket', 'src/graphics/mark_bracket.png')
+            .add('arrowup_up', 'src/graphics/arrowup_up.png')
+            .add('arrowup_over', 'src/graphics/arrowup_over.png')
+            .add('arrowup_hit', 'src/graphics/arrowup_hit.png')
+            .on('complete', function (loader, resources) {
+              this.sprites.player_blue = new PIXI.Sprite(resources.player_blue.texture);
+              this.sprites.mark_bracket = new PIXI.Sprite(resources.mark_bracket.texture);
+              this.sprites.arrowup_up = new PIXI.Sprite(resources.arrowup_up.texture);
+              this.sprites.arrowup_over = new PIXI.Sprite(resources.arrowup_over.texture);
+              this.sprites.arrowup_up = new PIXI.Sprite(resources.arrowup_up.texture);
+              this.createPlayer();
+          },this);
+          this.loader.load();
 
-            .load(function(loader, resources) {
-              newSprites.player_blue = new PIXI.Sprite(resources.player_blue.texture);
-              newSprites.mark_bracket = new PIXI.Sprite(resources.mark_bracket.texture);
+    }
+    private createPlayer(){
+      //player
+      this.player = this.sprites.player_blue;
+      this.stage.addChild(this.player);
+      this.player.position.x = 500;
+      this.player.position.y = 500;
+    }
+    // private createButtons = function(){
+    //   var rowsButton = new Btn(newStage, resources, "arrowup", 700, 500, function(){
+    //     console.log("callback: " + rows);
+    //     // rows++;
+    //     // this.typeMe(newStage.getChildByName('rowsValue'), rows, 0, 0);
+    //   })
+    // }
+    private onLoadCompleted = function(newResources:any,me){
 
-                //player
-                newStage.addChild(newSprites.player_blue);
-                newSprites.player_blue.position.x = 500;
-                newSprites.player_blue.position.y = 500;
-
-                drawGrid(newStage, resources, rows, cols, 65);
-            });
+      console.log(me);
+      console.log(newResources);
+      this.resoruces = newResources;
     }
     private drawGrid = function(newStage:any, resources:any, rows:number, cols:number, spacing:number): void {
       var container = new PIXI.Container();
