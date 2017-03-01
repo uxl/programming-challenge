@@ -1,13 +1,9 @@
 'use strict';
-
-
-
 var app = require('electron').app;
 var BrowserWindow = require('electron').BrowserWindow;
 var Menu = require('electron').Menu;
 var mainWindow = null;
 var path = require('path');
-
 var template = [
     {
         label: 'Electron',
