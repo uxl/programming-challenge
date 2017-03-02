@@ -91,9 +91,9 @@ export class Gui {
     }
 
     private onLoadCompleted = function() {
-      //containers
-      this.arrowcontainer = new PIXI.Container();
-      this.stage.addChild(this.arrowcontainer);
+        //containers
+        this.arrowcontainer = new PIXI.Container();
+        this.stage.addChild(this.arrowcontainer);
 
         this.createLine();
         this.createText();
@@ -112,15 +112,15 @@ export class Gui {
         this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 0);
     }
     private createButtons = function() {
-      var stopButton = new Btn(this.stage, this.loader.resources, "stop", "stop_up",  window.innerWidth - 250, window.innerHeight - 30, function() {
-          //update board/matrix
-          //toggle playback
-      }.bind(this));
-      var resetButton = new Btn(this.stage, this.loader.resources, "arrow", "arrow_up", window.innerWidth - 200, window.innerHeight - 30, function() {
-          //update board/matrix
-          this.stage.destory(true);
+        var stopButton = new Btn(this.stage, this.loader.resources, "stop", "stop_up", window.innerWidth - 250, window.innerHeight - 30, function() {
+            //update board/matrix
+            //toggle playback
+        }.bind(this));
+        var resetButton = new Btn(this.stage, this.loader.resources, "arrow", "arrow_up", window.innerWidth - 200, window.innerHeight - 30, function() {
+            //update board/matrix
+            this.stage.destory(true);
 
-      }.bind(this));
+        }.bind(this));
         var rowsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "rowsup", 405, window.innerHeight - 45, function() {
             //update board/matrix
             this.increaseGrid();
@@ -157,23 +157,49 @@ export class Gui {
         pos.angle = (this.grid[gridIndex].direction * 90);
         return pos;
     }
-    //make arrows
+    // //make arrows
+    // private createArrows = function(): void {
+    //   if (this.arrows.length > 0) {
+    //     for (var i = 0; i < this.arrows.length; i++) {
+    //       this.arrows[i].destroy();
+    //     }
+    //   }
+    //   this.arrows = [];
+    //
+    //     for (var i = 0; i < this.grid.length; i++) {
+    //       this.arrows.push(new PIXI.Sprite(this.loader.resources.arrow_direction.texture));
+    //       this.stage.addChild(this.arrows[i]);
+    //         this.arrows[i].anchor.set(0.5,0.5);
+    //         var padx = 25;
+    //         var pady = 25;
+    //         var pos = this.getPosition(padx, pady, i);
+    //         createjs.Tween.get(this.arrows[i]).to({x: pos.x, y: pos.y, rotation: pos.angle, delay: 10*i }, 1);
+    //     }
+    //     // this.arrowcontainer.x = (this.squarecontainer.width);
+    //     // this.arrowcontainer.y = (this.squarecontainer.height);
+    // }
     private createArrows = function(): void {
-      if (this.arrows.length > 0) {
-        for (var i = 0; i < this.arrows.length; i++) {
-          this.arrows[i].destroy();
+        if (this.arrows.length > 0) {
+            for (var i = 0; i < this.arrows.length; i++) {
+                this.arrows[i].destroy();
+            }
         }
-      }
-      this.arrows = [];
-
+        this.arrows = [];
+        var style = new PIXI.TextStyle({
+            fontFamily: 'Arial',
+            fontSize: 36,
+            fontStyle: 'italic',
+            fontWeight: 'bold',
+            fill: '#ffffff', // gradient
+        });
         for (var i = 0; i < this.grid.length; i++) {
-          this.arrows.push(new PIXI.Sprite(this.loader.resources.arrow_direction.texture));
-          this.stage.addChild(this.arrows[i]);
-            this.arrows[i].anchor.set(0.5,0.5);
+            this.arrows.push(new PIXI.Text('>>'));
+            this.stage.addChild(this.arrows[i]);
+            this.arrows[i].anchor.set(0.5, 0.5);
             var padx = 25;
             var pady = 25;
             var pos = this.getPosition(padx, pady, i);
-            createjs.Tween.get(this.arrows[i]).to({x: pos.x, y: pos.y, rotation: pos.angle, delay: 10*i }, 1);
+            createjs.Tween.get(this.arrows[i]).to({ x: pos.x, y: pos.y, rotation: pos.angle, delay: 1000 }, 1);
         }
         // this.arrowcontainer.x = (this.squarecontainer.width);
         // this.arrowcontainer.y = (this.squarecontainer.height);
