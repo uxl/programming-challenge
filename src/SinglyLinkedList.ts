@@ -10,15 +10,15 @@ export class SinglyLinkedList {
   constructor(){
 
   }
-    private Node = function(data){
+    public node = function(data){
         this.data = data;
         this.next = null;
     }
-    private SinglyList = function() {
+    public SinglyList = function() {
         this._length = 0;
         this.head = null;
     }
-    private add = function(value) {
+    public add = function(value) {
         var node = new this.Node(value),
             currentNode = this.head;
 

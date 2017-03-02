@@ -210,8 +210,8 @@ export class Gui {
 
 
         //produce linkedList
-        //start here!!!
         this.linklist = this.algorithm.createLinkedList(this.grid, ran);
+
         //console.log(this.grid);
 
 
