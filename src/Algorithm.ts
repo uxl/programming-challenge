@@ -7,7 +7,7 @@ export class Algorithm {
   private singlylist = new SinglyLinkedList();
   private _rows:number = 10;
   private _cols:number = 10;
-  private _spacing:number = 10; //row vs col => row.width * rows; min:2px max: 50px;
+  private _spacing:number = 50; //row vs col => row.width * rows; min:2px max: 50px;
 
   private grid:Object = {};
 
@@ -15,24 +15,45 @@ export class Algorithm {
 
   }
 
+  // private linkedList = SinglyList;
+  private hasCycle = function(head){
+      var fast = head;
+      var slow = head;
+      while(fast!= null && fast.next != null){
+        fast = fast.next.next;
+        slow = slow.next;
+        //if fast and slow pointers are meeting then LinkedList is cyclic
+        if(fast == slow ){
+          return true;
+        }
+      }
+      return false;
+    }
+
   get rows():number {
       return this._rows;
   }
   set rows(newval:number) {
       this._rows = newval;
-      console.log("row updated: " + this._rows);
+      this._rows = newval;
   }
   get cols():number {
       return this._cols;
   }
   set cols(newval:number) {
       this._cols = newval;
-      console.log("cols updated: " + this._cols);
+      this._rows = newval;
+  }
+  get spacing():number {
+      return this._spacing;
+  }
+  set spacing(newval:number) {
+      this._spacing = newval;
   }
 
   public reset = function(){
-    //createGrid
-    var grid = this.createGrid();
+    //buildGrid
+    var grid = this.buildGrid();
     //pick random starting position
     var randomStart = this.randomStart();
     //build linked list
@@ -41,9 +62,7 @@ export class Algorithm {
     return grid;
 
   }
-
-
-  private createGrid = function(){
+  private buildGrid = function(){
     let amount = this._rows * this._cols;
     let direction = Math.floor(Math.random()*4);
     let grid: object[] = [];

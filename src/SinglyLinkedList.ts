@@ -10,21 +10,6 @@ export class SinglyLinkedList {
   constructor(){
 
   }
-  // private linkedList = SinglyList;
-  private hasCycle = function(head){
-    	var fast = head;
-    	var slow = head;
-    	while(fast!= null && fast.next != null){
-    		fast = fast.next.next;
-    		slow = slow.next;
-        //if fast and slow pointers are meeting then LinkedList is cyclic
-    		if(fast == slow ){
-    			return true;
-    		}
-    	}
-    	return false;
-    }
-
     private Node = function(data){
         this.data = data;
         this.next = null;

@@ -1,6 +1,8 @@
 import * as PIXI from "pixi.js";
 import { Btn } from "./Btn";
 import { Algorithm } from "./Algorithm";
+import * as createjs from "createjs-browserify";
+
 
 export class Gui {
     private stage: PIXI.Container;
@@ -24,9 +26,13 @@ export class Gui {
     private resources: any;
     private marks: any = [];
     private player: PIXI.Sprite;
+    private squarecontainer: PIXI.Container;
+    private grid:any = {};
+    //create container for grid
 
     constructor(mainStage: PIXI.Container, mainColors: any, mainSounds: any) {
         this.stage = mainStage;
+
         this.colors = mainColors;
         this.sounds = mainSounds;
         this.loadImages();
@@ -71,77 +77,94 @@ export class Gui {
         this.createText();
         this.createButtons();
     }
+    private increaseGrid(){
+      this.algorithm.rows++;
+      this.algorithm.cols++;
+      this.typeMe(this.rowsValue, this.algorithm.rows.toString(), 0, 0);
+      this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 0);
+    }
+    private reduceGrid(){
+      this.algorithm.rows--;
+      this.algorithm.cols--;
+      this.typeMe(this.rowsValue, this.algorithm.rows.toString(), 0, 0);
+      this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 0);
+    }
     private createButtons = function() {
         var rowsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "rowsup", 405, window.innerHeight - 45, function() {
-            this.algorithm.rows++;
-            this.typeMe(this.rowsValue, this.algorithm.rows.toString(), 0, 0)
             //update board/matrix
+            this.increaseGrid();
             this.createGrid();
 
         }.bind(this));
         var rowsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", "rowdown", 400, window.innerHeight - 30, function() {
-            this.algorithm.rows--;
-            this.typeMe(this.rowsValue, this.algorithm.rows.toString(), 0, 0)
             //update board/matrix
+            this.reduceGrid();
             this.createGrid();
 
         }.bind(this));
         var colsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "colsup", 605, window.innerHeight - 45, function() {
-            this.algorithm.cols++;
-            this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 0)
             //update board/matrix
+            this.increaseGrid();
             this.createGrid();
 
         }.bind(this));
         var colsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", "colsdown", 600, window.innerHeight - 30, function() {
-            this.algorithm.cols--;
-            this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 0)
             //update board/matrix
+            this.reduceGrid();
+            this.createGrid();
         }.bind(this));
-        this.createGrid();
+
+    }
+    private movePlayer = function(gridIndex:number): void {
+      //graphic offset
+      var padx = this.squarecontainer.x + 25;
+      var pady = this.squarecontainer.y + 40;
+      //calculate position
+      var posx = this.grid[gridIndex].x * this.algorithm.spacing + padx;
+      var posy = this.grid[gridIndex].y * this.algorithm.spacing + pady;
+
+      createjs.Tween.get(this.player).to({ x:posx, y:posy, delay:2000},1000, createjs.Ease.quadOut);
 
     }
     private createPlayer = function(): void {
-        //player
-        this.player = this.sprites.player_blue;
-        this.stage.addChild(this.player);
-        this.player.position.x = 500;
-        this.player.position.y = 500;
-        this.sounds.play("start");
 
+      //get random position
+      var ran = this.algorithm.randomStart();
+
+      //graphic offset
+      var padx = this.squarecontainer.x + 25;
+      var pady = this.squarecontainer.y + 40;
+      //calculate position
+      var posx = this.grid[ran].x * this.algorithm.spacing + padx;
+      var posy = this.grid[ran].y * this.algorithm.spacing + pady;
+
+      //player
+      this.player = this.sprites.player_blue;
+      this.stage.addChild(this.player);
+      this.player.anchor.set(0.5,0.8);
+      this.player.position.x = posx;
+      this.player.position.y = posy;
+
+      this.sounds.play("start");
+
+      this.movePlayer(this.algorithm.randomStart());
     }
     private isEven = function(n) {
         return n % 2 == 0;
     }
     private createGrid = function() {
-        var grid = this.algorithm.reset();
+        this.grid = this.algorithm.reset();
 
-        //create container for grid
-        var squarecontainer = new PIXI.Container();
-        var markcontainer = new PIXI.Container();
+        if(this.squarecontainer){
+          this.squarecontainer.destroy(true);
+        }
+        this.squarecontainer = new PIXI.Container();
+        this.stage.addChild(this.squarecontainer);
 
-        //make marks
-        // this.stage.addChild(markcontainer);
-        // for (var i = 0; i < grid.length * 4; i++) {
-        //
-        //     var mark = new PIXI.Sprite(this.loader.resources.mark_dot.texture);
-        //
-        //     markcontainer.addChild(mark);
-        //
-        //     mark.anchor.set(0.5);
-        //     mark.x = (i % (this.algorithm.cols * 4)) * this.spacing;//(i % this.cols) * this.spacing;
-        //     mark.y = Math.floor(i / (this.algorithm.rows * 4)) * this.spacing; //(i % this.cols) * this.spacing;
-        //
-        //     mark.scale.x = 1;
-        //     mark.scale.y = 1;
-        // }
-
-        //make squares
-        this.stage.addChild(squarecontainer);
         //using graphics for squares
         var squares = new PIXI.Graphics();
         let squarecolor: number;
-        for (var i = 0; i < grid.length; i++) {
+        for (var i = 0; i < this.grid.length; i++) {
             // set a fill and line style
             if (this.isEven(Math.floor(i / this.algorithm.rows))) {
                 if (this.isEven(i)) {
@@ -158,20 +181,15 @@ export class Gui {
             }
             squares.beginFill(squarecolor, 0.5);
             squares.lineStyle(1, this.colors.lines, 1);
-            var x = (i % this.algorithm.cols) * this.spacing;
-            var y = Math.floor(i / this.algorithm.rows) * this.spacing;
-            squares.drawRect(x, y, this.spacing, this.spacing);
+            var x = (i % this.algorithm.cols) * this.algorithm.spacing;
+            var y = Math.floor(i / this.algorithm.rows) * this.algorithm.spacing;
+            squares.drawRect(x, y, this.algorithm.spacing, this.algorithm.spacing);
         }
-        squarecontainer.addChild(squares);
+        this.squarecontainer.addChild(squares);
 
         // Center on the screen
-
-        markcontainer.x = 0;//(window.innerWidth) / 2;
-        markcontainer.y = 0;//(window.innerHeight) / 2;
-        // Center on the screen
-
-        squarecontainer.x = (window.innerWidth - squarecontainer.width) / 2;
-        squarecontainer.y = (window.innerHeight - squarecontainer.height) / 2;
+        this.squarecontainer.x = (window.innerWidth - this.squarecontainer.width) / 2;
+        this.squarecontainer.y = (window.innerHeight - this.squarecontainer.height) / 2;
         this.createPlayer();
     }
 

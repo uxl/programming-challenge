@@ -33,6 +33,7 @@
     "watchify": "latest"
   },
   "dependencies": {
+    "createjs-browserify": "^1.0.5",
     "electron-prebuilt": "^1.4.1",
     "ezgui": "git+https://github.com/Ezelia/EZGUI.git",
     "howler": "^2.0.2",
