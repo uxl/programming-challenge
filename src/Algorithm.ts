@@ -14,7 +14,43 @@ export class Algorithm {
   constructor(){
 
   }
+  //private findObject
 
+  // 5,5 -> right x + 1, left x -1, up y + 1, down y - 1
+
+  private createLinkedList = function(grid, head){
+    var next;
+      for(let i = 0; next != null; i++){
+
+      }
+          // Node h = new Node(0,0);
+          // Node k = h;
+          // //find the arrow at (0,0)
+          // if(arrow is left or up){
+          //     k.next = null;
+          // }
+          // else{
+          //
+          //     while(k != null){
+          //         if the arrow is right
+          //             Node next = new Node(h.x , h.y+1)
+          //             k.next = next;
+          //             k = k.next;
+          //         else if the arrow is down
+          //             Node next = new Node(h.x+1, h.y);
+          //             k.next = next;
+          //             k = k.next;
+          //         else if the arrow is left
+          //             Node next = new Node(h.x, h.y-1);
+          //             k.next = next;
+          //             k = k.next;
+          //         else if the arrow is up
+          //             Node next = new Node(h.x - 1, h.y);
+          //             k.next = next;
+          //             k = k.next;
+          //     }
+          // }
+  }
   // private linkedList = SinglyList;
   private hasCycle = function(head){
       var fast = head;
@@ -64,10 +100,10 @@ export class Algorithm {
   }
   private buildGrid = function(){
     let amount = this._rows * this._cols;
-    let direction = Math.floor(Math.random()*4);
     let grid: object[] = [];
     for (var i = 0; i < amount; i++) {
-      var cell = {x:(i % this._cols), y: Math.floor(i / this._rows), direction:direction};
+      let dir = Math.floor(Math.random()*4);
+      var cell = {x:(i % this._cols), y: Math.floor(i / this._rows), direction:dir};
       grid.push(cell);
     }
     return grid;
