@@ -38,10 +38,12 @@ export class Algorithm {
     //build linked list
     var head = grid[randomStart];
 
+    return grid;
+
   }
 
 
-  public createGrid = function(){
+  private createGrid = function(){
     let amount = this._rows * this._cols;
     let direction = Math.floor(Math.random()*4);
     let grid: object[] = [];
@@ -49,8 +51,7 @@ export class Algorithm {
       var cell = {x:(i % this._cols), y: Math.floor(i / this._rows), direction:direction};
       grid.push(cell);
     }
-    console.log(grid);
-    // return grid;
+    return grid;
   }
   public randomStart = function(){
     let amount = this._rows * this._cols;

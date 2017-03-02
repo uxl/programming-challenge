@@ -35,7 +35,7 @@ export class Gui {
         //load images'
         this.loader = PIXI.loader
             .add('player_blue', 'src/graphics/player_blue.png')
-            .add('mark_bracket', 'src/graphics/mark_bracket.png')
+            .add('mark_dot', 'src/graphics/mark_dot.png')
             .add('arrowup_up', 'src/graphics/arrowup_up.png')
             .add('arrowup_over', 'src/graphics/arrowup_over.png')
             .add('arrowup_hit', 'src/graphics/arrowup_hit.png')
@@ -44,7 +44,7 @@ export class Gui {
             .add('arrowdown_hit', 'src/graphics/arrowdown_hit.png')
             .on('complete', function(loader, resources) {
                 this.sprites.player_blue = new PIXI.Sprite(resources.player_blue.texture);
-                this.sprites.mark_bracket = new PIXI.Sprite(resources.mark_bracket.texture);
+                this.sprites.mark_dot = new PIXI.Sprite(resources.mark_dot.texture);
                 this.sprites.colsup_up = new PIXI.Sprite(resources.arrowup_up.texture);
                 this.sprites.colsup_over = new PIXI.Sprite(resources.arrowup_over.texture);
                 this.sprites.colsup_hit = new PIXI.Sprite(resources.arrowup_up.texture);
@@ -61,41 +61,45 @@ export class Gui {
             }.bind(this));
         this.loader.load();
     }
-    private coordinates = function(){
+    private coordinates = function() {
 
     }
 
     private onLoadCompleted = function() {
-        this.createGrid( this.algorithm.cols, this.algorithm.rows);
+        this.createGrid(this.algorithm.cols, this.algorithm.rows);
         this.createLine();
         this.createText();
         this.createButtons();
     }
-    private createButtons = function(){
-      var rowsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "rowsup", 405, window.innerHeight - 45, function(){
-        this.algorithm.rows++;
-        this.typeMe(this.rowsValue, this.algorithm.rows.toString(),0,0)
-        //update board/matrix
+    private createButtons = function() {
+        var rowsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "rowsup", 405, window.innerHeight - 45, function() {
+            this.algorithm.rows++;
+            this.typeMe(this.rowsValue, this.algorithm.rows.toString(), 0, 0)
+            //update board/matrix
+            this.createGrid();
 
-      }.bind(this));
-      var rowsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", "rowdown",400, window.innerHeight - 30, function(){
-        this.algorithm.rows--;
-        this.typeMe(this.rowsValue, this.algorithm.rows.toString(),0,0)
-        //update board/matrix
+        }.bind(this));
+        var rowsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", "rowdown", 400, window.innerHeight - 30, function() {
+            this.algorithm.rows--;
+            this.typeMe(this.rowsValue, this.algorithm.rows.toString(), 0, 0)
+            //update board/matrix
+            this.createGrid();
 
-      }.bind(this));
-      var colsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "colsup", 605, window.innerHeight - 45, function(){
-        this.algorithm.cols++;
-        this.typeMe(this.colsValue, this.algorithm.cols.toString(),0,0)
-        //update board/matrix
+        }.bind(this));
+        var colsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "colsup", 605, window.innerHeight - 45, function() {
+            this.algorithm.cols++;
+            this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 0)
+            //update board/matrix
+            this.createGrid();
 
-      }.bind(this));
-      var colsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", "colsdown", 600, window.innerHeight - 30, function(){
-        this.algorithm.cols--;
-        this.typeMe(this.colsValue, this.cols.toString(),0,0)
-        //update board/matrix
+        }.bind(this));
+        var colsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", "colsdown", 600, window.innerHeight - 30, function() {
+            this.algorithm.cols--;
+            this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 0)
+            //update board/matrix
+        }.bind(this));
+        this.createGrid();
 
-      }.bind(this));
     }
     private createPlayer = function(): void {
         //player
@@ -106,31 +110,68 @@ export class Gui {
         this.sounds.play("start");
 
     }
-    private createGrid = function(rows,cols) {
-        this.algorithm.createGrid();
-        var container = new PIXI.Container();
-        this.stage.addChild(container);
+    private isEven = function(n) {
+        return n % 2 == 0;
+    }
+    private createGrid = function() {
+        var grid = this.algorithm.reset();
 
-        let totalmarks = this.algorithm.rows * this.algorithm.cols;
-        console.log(totalmarks);
-        for (var i = 0; i < totalmarks; i++) {
-          // console.log(;
-          // console.log("x: " + Math.floor(i * this.rows) * this.spacing + "y: " + (i % this.cols) * this.spacing););
-            var mark = new PIXI.Sprite(this.loader.resources.mark_bracket.texture);
-            container.addChild(mark);
+        //create container for grid
+        var squarecontainer = new PIXI.Container();
+        var markcontainer = new PIXI.Container();
 
-            mark.anchor.set(0.5);
-            mark.x = (i % this.algorithm.cols) * this.spacing;//(i % this.cols) * this.spacing;
-            mark.y = Math.floor(i / this.algorithm.rows) * this.spacing; //(i % this.cols) * this.spacing;
-            // bunny.x = (i % 5) * 40;
-            // bunny.y = Math.floor(i / 5) * 40;            mark.y = Math.floor(i / this.rows) * this.spacing;
-            mark.scale.x = 1;
-            mark.scale.y = 1;
+        //make marks
+        // this.stage.addChild(markcontainer);
+        // for (var i = 0; i < grid.length * 4; i++) {
+        //
+        //     var mark = new PIXI.Sprite(this.loader.resources.mark_dot.texture);
+        //
+        //     markcontainer.addChild(mark);
+        //
+        //     mark.anchor.set(0.5);
+        //     mark.x = (i % (this.algorithm.cols * 4)) * this.spacing;//(i % this.cols) * this.spacing;
+        //     mark.y = Math.floor(i / (this.algorithm.rows * 4)) * this.spacing; //(i % this.cols) * this.spacing;
+        //
+        //     mark.scale.x = 1;
+        //     mark.scale.y = 1;
+        // }
+
+        //make squares
+        this.stage.addChild(squarecontainer);
+        //using graphics for squares
+        var squares = new PIXI.Graphics();
+        let squarecolor: number;
+        for (var i = 0; i < grid.length; i++) {
+            // set a fill and line style
+            if (this.isEven(Math.floor(i / this.algorithm.rows))) {
+                if (this.isEven(i)) {
+                    squarecolor = this.colors.squaredark
+                } else {
+                    squarecolor = this.colors.squarelight
+                }
+            } else {
+                if (this.isEven(i)) {
+                    squarecolor = this.colors.squarelight
+                } else {
+                    squarecolor = this.colors.squaredark
+                }
+            }
+            squares.beginFill(squarecolor, 0.5);
+            squares.lineStyle(1, this.colors.lines, 1);
+            var x = (i % this.algorithm.cols) * this.spacing;
+            var y = Math.floor(i / this.algorithm.rows) * this.spacing;
+            squares.drawRect(x, y, this.spacing, this.spacing);
         }
+        squarecontainer.addChild(squares);
 
         // Center on the screen
-        container.x = (window.innerWidth - container.width) / 2;
-        container.y = (window.innerHeight - container.height) / 2;
+
+        markcontainer.x = 0;//(window.innerWidth) / 2;
+        markcontainer.y = 0;//(window.innerHeight) / 2;
+        // Center on the screen
+
+        squarecontainer.x = (window.innerWidth - squarecontainer.width) / 2;
+        squarecontainer.y = (window.innerHeight - squarecontainer.height) / 2;
         this.createPlayer();
     }
 
