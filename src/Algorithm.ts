@@ -8,13 +8,100 @@ export class Algorithm {
   private _rows:number = 10;
   private _cols:number = 10;
   private _spacing:number = 50; //row vs col => row.width * rows; min:2px max: 50px;
-
+  private linkedlist: SinglyLinkedList;
   private grid:Object = {};
 
   constructor(){
 
   }
+  private findObject = function(posx:number,posy:number, arry:any){
+      // var grid = [{x:1,y:1,joe:1},{x:3,y:4,joe:"w"},{x:6,y:1,joe:"z"}];
+      var findSquare:Function = function(element) {
+        return element.x == posx && element.y == posy;
+      }
 
+      arry.find(findSquare);
+      arry.findIndex(findSquare);
+  }
+
+
+  // 5,5 -> right x + 1, left x -1, up y + 1, down y - 1
+
+  private createLinkedList = function(grid, head){
+    var nodes = [];
+    //create all nodes so that we can nest them
+    for (var i = 0; i < grid.length; i++) {
+      let newnode = new this.linkedlist.node(grid[i]);
+      nodes.push(newnode);
+    }
+    alert(nodes[head].data.direction);
+    //now start with head and nest all nodes for our list
+    var theList = [];
+    //get direction of current node
+    var next;
+    switch(nodes[head].data.direction){
+      case 0:
+        next.x = nodes[head].data.x;
+        next.y = nodes[head].data.y - 1;
+        break;
+      case 1:
+        next.x = nodes[head].data.x + 1;
+        next.y = nodes[head].data.y;
+        break;
+      case 2:
+        next.x = nodes[head].data.x;
+        next.y = nodes[head].data.y + 1;
+        break;
+      case 3:
+        next.x = nodes[head].data.x - 1;
+        next.y = nodes[head].data.y;
+        break;
+    }
+    //
+    // nodes[head].next = ;
+    // var bnode =
+    // while(next != null){
+    //
+    }
+
+
+
+
+    // grid[head].x grid[head].y
+
+  //   this.findObject()
+  //   var h = new this.SinglyList.node()
+  //     while(head != null){
+  //       ll
+  //     }
+  //         // Node h = new Node(0,0);
+  //         // Node k = h;
+  //         // //find the arrow at (0,0)
+  //         // if(arrow is left or up){
+  //         //     k.next = null;
+  //         // }
+  //         // else{
+  //         //
+  //         //     while(k != null){
+  //         //         if the arrow is right
+  //         //             Node next = new Node(h.x , h.y+1)
+  //         //             k.next = next;
+  //         //             k = k.next;
+  //         //         else if the arrow is down
+  //         //             Node next = new Node(h.x+1, h.y);
+  //         //             k.next = next;
+  //         //             k = k.next;
+  //         //         else if the arrow is left
+  //         //             Node next = new Node(h.x, h.y-1);
+  //         //             k.next = next;
+  //         //             k = k.next;
+  //         //         else if the arrow is up
+  //         //             Node next = new Node(h.x - 1, h.y);
+  //         //             k.next = next;
+  //         //             k = k.next;
+  //         //     }
+  //         // }
+  // }
   // private linkedList = SinglyList;
   private hasCycle = function(head){
       var fast = head;
@@ -62,12 +149,13 @@ export class Algorithm {
     return grid;
 
   }
+
   private buildGrid = function(){
     let amount = this._rows * this._cols;
-    let direction = Math.floor(Math.random()*4);
     let grid: object[] = [];
     for (var i = 0; i < amount; i++) {
-      var cell = {x:(i % this._cols), y: Math.floor(i / this._rows), direction:direction};
+      let dir = Math.floor(Math.random()*4);
+      var cell = {x:(i % this._cols), y: Math.floor(i / this._rows), direction:dir};
       grid.push(cell);
     }
     return grid;
