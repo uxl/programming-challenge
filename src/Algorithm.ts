@@ -174,7 +174,7 @@ private findDirection = function(arr:any, pointer:number){
 
     //returns object
     private getNext = function(current:any){ //pointer, ""
-    console.log('me: ' + current.direction);
+    // console.log('direction: ' + current.direction);
     var result = {};
         if (current.direction == 1){ //right
             result = {x:current.x+1 , y:current.y};
