@@ -11,6 +11,7 @@ export class SinglyLinkedList {
 
   }
     public node = function(data){
+      // console.log("creating node in SinglyLinkedList with data: " + data.x);
         this.data = data;
         this.next = null;
     }
