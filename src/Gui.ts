@@ -112,16 +112,13 @@ export class Gui {
         this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 0);
     }
     private createButtons = function() {
-      var rowsButtonUp = new Btn(this.stage, this.loader.resources, "stop_up", "stop_up", 405, window.innerHeight - 45, function() {
+      var stopButton = new Btn(this.stage, this.loader.resources, "stop", "stop_up",  window.innerWidth - 250, window.innerHeight - 30, function() {
           //update board/matrix
-          this.increaseGrid();
-          this.drawGrid();
-
+          //toggle playback
       }.bind(this));
-      var rowsButtonUp = new Btn(this.stage, this.loader.resources, "arrow_up", "arrow_up", 405, window.innerHeight - 45, function() {
+      var resetButton = new Btn(this.stage, this.loader.resources, "arrow", "arrow_up", window.innerWidth - 200, window.innerHeight - 30, function() {
           //update board/matrix
-          this.increaseGrid();
-          this.drawGrid();
+          this.stage.destory(true);
 
       }.bind(this));
         var rowsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "rowsup", 405, window.innerHeight - 45, function() {
@@ -211,27 +208,13 @@ export class Gui {
 
         this.sounds.play("start");
 
+
         //produce linkedList
-        this.linklist = this.algorithm.createLinkedList(this.grid, ran);
+        //this.linklist = this.algorithm.createLinkedList(this.grid, ran);
         //console.log(this.grid);
 
-        var result = this.grid.filter(function(obj) {
-            return obj.x == 3 && obj.y == 2;
-        });
 
-        console.log('search: ' + result);
-        console.log('search: ' + result[0].direction);
 
-        // function isPrime(element, index, array) {
-        //       var start = 2;
-        //       while (start <= Math.sqrt(element)) {
-        //           if (element % start++ < 1) return false;
-        //       }
-        //       return (element > 1);
-        //   }
-        //
-        //   console.log( [4, 6, 8, 12].findIndex(isPrime) ); // -1, not found
-        //   console.log( [4, 6, 7, 12].findIndex(isPrime) ); // 2
         //test for loop
         //return step loop appears
 
