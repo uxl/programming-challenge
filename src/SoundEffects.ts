@@ -11,7 +11,7 @@ export class SoundEffects {
         start: [212, 1664],
         dot: [1664, 1700],
         line: [1700, 1800],
-        error: [6000, 5000],
+        error: [2100, 3000],
         move: [6000, 5000]
       }
     });
