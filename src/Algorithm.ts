@@ -1,7 +1,4 @@
-import { SoundEffects } from "./SoundEffects";
-
 //Get sound effects
-const SOUNDLIB = new SoundEffects;
 
 
 export class Algorithm {
@@ -13,7 +10,6 @@ export class Algorithm {
     private grid: Object = {};
 
     constructor() {
-
     }
 
     get rows(): number {
@@ -95,10 +91,8 @@ export class Algorithm {
             console.log(fast.x + " | " + fast.y + " | " + slow.x + " | " + slow.y);
 
             if (fast.x === undefined || fast.y === undefined || fast.x < 0 || fast.y < 0 || fast.x > this._cols || fast.y > this._rows) {
-              SOUNDLIB.play("error");
                 return "off the grid";
             } else if (fast.x == slow.x && fast.y == slow.y) {
-              SOUNDLIB.play("line");
                 return "loop in the path";
             }
         } while (counter < this._rows * this._cols);
