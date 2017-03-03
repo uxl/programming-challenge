@@ -6,7 +6,7 @@ import * as createjs from "createjs-browserify";
 
 export class Gui {
     private stage: PIXI.Container;
-    private algorithm: Algorithm = new Algorithm;
+    private algorithm: Algorithm;
     private colors: any;
     private sounds: any;
 
@@ -36,6 +36,7 @@ export class Gui {
         this.stage = mainStage;
         this.colors = mainColors;
         this.sounds = mainSounds;
+        this.algorithm = new Algorithm();
         this.loadImages();
     }
     private loadImages = function(): void {

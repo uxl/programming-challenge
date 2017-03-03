@@ -1,23 +1,20 @@
 import { Howl } from "howler";
 
 export class SoundEffects {
-  public sndsprite:Howl;
+    public sndsprite: Howl;
     constructor() {
-      //load sprite
-      this.sndsprite = new Howl({
-      src: ['src/audio/sprite.wav'],
-      sprite: {
-        keypress: [10, 54],
-        start: [212, 1664],
-        dot: [1664, 1700],
-        line: [1700, 1800],
-        error: [2100, 3000],
-        move: [6000, 5000]
-      }
-    });
+        //load sprite
+        this.sndsprite = new Howl({
+            src: ['src/audio/sprite.wav'],
+            sprite: {
+                keypress: [10, 54],
+                start: [249, 1650],
+                klaxon: [1980, 2620]
+            }
+        });
     }
-    public play = function(snd:string):void{
-      //console.log("snd", snd);
-      this.sndsprite.play(snd);
+    public play = function(snd: string): void {
+        //console.log("snd", snd);
+        this.sndsprite.play(snd);
     }
-  }
+}
