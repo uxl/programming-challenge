@@ -91,9 +91,9 @@ export class Gui {
     }
 
     private onLoadCompleted = function() {
-      //containers
-      this.arrowcontainer = new PIXI.Container();
-      this.stage.addChild(this.arrowcontainer);
+        //containers
+        this.arrowcontainer = new PIXI.Container();
+        this.stage.addChild(this.arrowcontainer);
 
         this.createLine();
         this.createText();
@@ -112,15 +112,15 @@ export class Gui {
         this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 0);
     }
     private createButtons = function() {
-      var stopButton = new Btn(this.stage, this.loader.resources, "stop", "stop_up",  window.innerWidth - 250, window.innerHeight - 30, function() {
-          //update board/matrix
-          //toggle playback
-      }.bind(this));
-      var resetButton = new Btn(this.stage, this.loader.resources, "arrow", "arrow_up", window.innerWidth - 200, window.innerHeight - 30, function() {
-          //update board/matrix
-          this.stage.destory(true);
+        var stopButton = new Btn(this.stage, this.loader.resources, "stop", "stop_up", window.innerWidth - 250, window.innerHeight - 30, function() {
+            //update board/matrix
+            //toggle playback
+        }.bind(this));
+        var resetButton = new Btn(this.stage, this.loader.resources, "arrow", "arrow_up", window.innerWidth - 200, window.innerHeight - 30, function() {
+            //update board/matrix
+            this.stage.destory(true);
 
-      }.bind(this));
+        }.bind(this));
         var rowsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "rowsup", 405, window.innerHeight - 45, function() {
             //update board/matrix
             this.increaseGrid();
@@ -154,7 +154,7 @@ export class Gui {
         //calculate position
         pos.x = this.grid[gridIndex].x * this.algorithm.spacing + padx;
         pos.y = this.grid[gridIndex].y * this.algorithm.spacing + pady;
-        pos.angle = (this.grid[gridIndex].direction * 90);
+        pos.angle = ((this.grid[gridIndex].direction * 90) * Math.PI / 180);
         return pos;
     }
     //make arrows
@@ -177,6 +177,8 @@ export class Gui {
         }
         // this.arrowcontainer.x = (this.squarecontainer.width);
         // this.arrowcontainer.y = (this.squarecontainer.height);
+        this.arrowcontainer.x = (this.squarecontainer.width);
+        this.arrowcontainer.y = (this.squarecontainer.height);
     }
     private movePlayer = function(gridIndex: number): void {
         //graphic offset
@@ -211,7 +213,8 @@ export class Gui {
 
         //produce linkedList
         // this.linklist = this.algorithm.createLinkedList(this.grid, ran);
-        this.algorithm.checkLoop(this.grid, ran);
+        var result = this.algorithm.checkLoop(this.grid, ran);
+        this.typeMe(this.status, result, 0, 0);
 
         //console.log(this.grid);
 

@@ -12,8 +12,8 @@ export class Btn {
         this.btnkind = btnkind;
         this.callback = callbk;
 
-        console.log("btnkind: " + this.btnkind);
-        console.log(name);
+        // console.log("btnkind: " + this.btnkind);
+        // console.log(name);
         // var textureButton = PIXI.Texture.fromImage('required/assets/button.png');
 
         this.buttonObject[name + "up"] = resources[btnkind + '_up'].texture;
@@ -53,14 +53,14 @@ export class Btn {
         this.stage.addChild(this.buttonObject[name + "base"]);
     }
     private onButtonDown = function(me,callback): void {
-        console.log("onButtonDown");
+        // console.log("onButtonDown");
         this.isdown = true;
         this.texture = this.buttonObject[me + "_hit"];
         this.alpha = 1;
         callback();
     }
     private onButtonUp = function(me): void {
-        console.log("onButtonUp");
+        // console.log("onButtonUp");
         this.isdown = false;
         if (this.isOver) {
             this.texture = this.buttonObject[me + "_over"];
@@ -70,7 +70,7 @@ export class Btn {
         }
     }
     private onButtonOver = function(me): void {
-        console.log("onButtonOver");
+        // console.log("onButtonOver");
         this.isOver = true;
         if (this.isdown) {
             return;
@@ -78,7 +78,7 @@ export class Btn {
         this.texture = this.buttonObject[me + "_over"];
     }
     private onButtonOut = function(me): void {
-        console.log("onButtonOut");
+        // console.log("onButtonOut");
         this.isOver = false;
         if (this.isdown) {
             return;
