@@ -216,7 +216,6 @@ export class Gui {
         var result = this.algorithm.checkLoop(this.grid, ran);
         this.typeMe(this.status, result, 0, 0);
 
-
         //console.log(this.grid);
 
 
