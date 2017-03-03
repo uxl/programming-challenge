@@ -154,55 +154,31 @@ export class Gui {
         //calculate position
         pos.x = this.grid[gridIndex].x * this.algorithm.spacing + padx;
         pos.y = this.grid[gridIndex].y * this.algorithm.spacing + pady;
-        pos.angle = (this.grid[gridIndex].direction * 90);
+        pos.angle = ((this.grid[gridIndex].direction * 90) * Math.PI / 180);
         return pos;
     }
-    // //make arrows
-    // private createArrows = function(): void {
-    //   if (this.arrows.length > 0) {
-    //     for (var i = 0; i < this.arrows.length; i++) {
-    //       this.arrows[i].destroy();
-    //     }
-    //   }
-    //   this.arrows = [];
-    //
-    //     for (var i = 0; i < this.grid.length; i++) {
-    //       this.arrows.push(new PIXI.Sprite(this.loader.resources.arrow_direction.texture));
-    //       this.stage.addChild(this.arrows[i]);
-    //         this.arrows[i].anchor.set(0.5,0.5);
-    //         var padx = 25;
-    //         var pady = 25;
-    //         var pos = this.getPosition(padx, pady, i);
-    //         createjs.Tween.get(this.arrows[i]).to({x: pos.x, y: pos.y, rotation: pos.angle, delay: 10*i }, 1);
-    //     }
-    //     // this.arrowcontainer.x = (this.squarecontainer.width);
-    //     // this.arrowcontainer.y = (this.squarecontainer.height);
-    // }
+    //make arrows
     private createArrows = function(): void {
-        if (this.arrows.length > 0) {
-            for (var i = 0; i < this.arrows.length; i++) {
-                this.arrows[i].destroy();
-            }
+      if (this.arrows.length > 0) {
+        for (var i = 0; i < this.arrows.length; i++) {
+          this.arrows[i].destroy();
         }
-        this.arrows = [];
-        var style = new PIXI.TextStyle({
-            fontFamily: 'Arial',
-            fontSize: 36,
-            fontStyle: 'italic',
-            fontWeight: 'bold',
-            fill: '#ffffff', // gradient
-        });
+      }
+      this.arrows = [];
+
         for (var i = 0; i < this.grid.length; i++) {
-            this.arrows.push(new PIXI.Text('>>'));
-            this.stage.addChild(this.arrows[i]);
-            this.arrows[i].anchor.set(0.5, 0.5);
+          this.arrows.push(new PIXI.Sprite(this.loader.resources.arrow_direction.texture));
+          this.stage.addChild(this.arrows[i]);
+            this.arrows[i].anchor.set(0.5,0.5);
             var padx = 25;
             var pady = 25;
             var pos = this.getPosition(padx, pady, i);
-            createjs.Tween.get(this.arrows[i]).to({ x: pos.x, y: pos.y, rotation: pos.angle, delay: 1000 }, 1);
+            createjs.Tween.get(this.arrows[i]).to({x: pos.x, y: pos.y, rotation: pos.angle, delay: 10*i }, 1);
         }
         // this.arrowcontainer.x = (this.squarecontainer.width);
         // this.arrowcontainer.y = (this.squarecontainer.height);
+        this.arrowcontainer.x = (this.squarecontainer.width);
+        this.arrowcontainer.y = (this.squarecontainer.height);
     }
     private movePlayer = function(gridIndex: number): void {
         //graphic offset

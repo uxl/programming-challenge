@@ -224,7 +224,7 @@ private findDirection = function(arr:any, pointer:number){
               break;
           }else if(fast.x == slow.x && fast.y == slow.y){
 
-              console.log("cycle in the path");
+              console.log("loop in the path");
               break;
           }
 
