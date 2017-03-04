@@ -1,8 +1,9 @@
 import * as PIXI from "pixi.js";
 import { Btn } from "./Btn";
 import { Algorithm } from "./Algorithm";
-import * as gsap from "gsap";
 
+import gsap = require('gsap');
+// import TweenLite = require('gsap/src/uncompressed/TweenLite.js');
 
 export class Gui {
     private stage: PIXI.Container;
@@ -23,18 +24,21 @@ export class Gui {
     private resources: any;
     private marks: any = [];
     private player: PIXI.Sprite;
-    private playeroffsets:any;
+    private playeroffsets: any;
     private squarecontainer: PIXI.Container;
     private arrowcontainer: PIXI.Container;
     private grid: any = {};
     private arrows: any = [];
+    private tl: gsap.TimelineLite;
+    private squareArr: PIXI.Graphics[];
 
     constructor(mainStage: PIXI.Container, mainColors: any, mainSounds: any) {
         this.stage = mainStage;
         this.colors = mainColors;
         this.sounds = mainSounds;
         this.algorithm = new Algorithm();
-        this.playeroffsets = {x: this.algorithm.spacing/2, y: this.algorithm.spacing/2};
+        this.playeroffsets = { x: this.algorithm.spacing / 2, y: this.algorithm.spacing / 2 };
+        this.tl = new gsap.TimelineLite({paused:true});
         this.loadImages();
     }
     private loadImages = function(): void {
@@ -160,61 +164,69 @@ export class Gui {
     }
     //make arrows
     private createArrows = function(): void {
-      if (this.arrows.length > 0) {
-        for (var i = 0; i < this.arrows.length; i++) {
-          this.arrows[i].destroy();
+        if (this.arrows.length > 0) {
+            for (var i = 0; i < this.arrows.length; i++) {
+                this.arrows[i].destroy();
+            }
         }
-      }
-      this.arrows = [];
+        this.arrows = [];
         for (var i = 0; i < this.grid.length; i++) {
-          this.arrows.push(new PIXI.Sprite(this.loader.resources.arrow_direction.texture));
-          this.stage.addChild(this.arrows[i]);
-            this.arrows[i].anchor.set(0.5,0.5);
+            this.arrows.push(new PIXI.Sprite(this.loader.resources.arrow_direction.texture));
+            this.stage.addChild(this.arrows[i]);
+            this.arrows[i].anchor.set(0.5, 0.5);
             var padx = 25;
             var pady = 25;
             var pos = this.getPosition(padx, pady, i);
-            gsap.TweenLite.to(this.arrows[i].position, 0, {x: pos.x, y:pos.y});
-            gsap.TweenLite.to(this.arrows[i], 0, {directionalRotation:{rotation: (pos.angle + '_short'), useRadians: true}});
+            gsap.TweenLite.to(this.arrows[i].position, 0, { x: pos.x, y: pos.y });
+            gsap.TweenLite.to(this.arrows[i], 0, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true } });
         }
         // this.arrowcontainer.x = (this.squarecontainer.width);
         // this.arrowcontainer.y = (this.squarecontainer.height);
         this.arrowcontainer.x = (this.squarecontainer.width);
         this.arrowcontainer.y = (this.squarecontainer.height);
     }
-    //takes index
-    private movePlayer = function(gridIndex: number, nduration:number, ndelay:number): void {
+    //takes index, duration, delay and if you want to queue multiple events onto timeline
+    private movePlayer = function(gridIndex: number, nduration: number, ndelay: number, queue: boolean): void {
         //calculate position
         var pos = this.getPosition(this.playeroffsets.x, this.playeroffsets.y, gridIndex);
 
         //set visited
         this.grid[gridIndex].visited = true;
 
-        gsap.TweenLite.to(this.player.position, nduration, {x: pos.x,y: pos.y, delay:ndelay});
-        gsap.TweenLite.to(this.player, nduration,{rotation: pos.angle, delay:ndelay});
-        // createjs.Tween.get(this.player).to({ x: pos.x, y: pos.y, rotation: pos.angle, delay: ndelay }, nduration, createjs.Ease.quadOut);
+        //set up transition
+        if (queue) {
+            console.log("queueing:" + gridIndex);
+            this.tl.add(gsap.TweenLite.to(this.player.position, nduration, { x: pos.x, y: pos.y, delay: ndelay }));
+            this.tl.add(gsap.TweenLite.to(this.player, nduration, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true } , delay: ndelay }));
+        } else {
+            console.log("immediate");
+            // console.log("this.player", this.player);
+            gsap.TweenLite.to(this.player.position, nduration, { x: pos.x, y: pos.y, delay: ndelay });
+            gsap.TweenLite.to(this.player, nduration, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true }, delay: ndelay },0);
+        }
     }
     private removePlayer = function(): void {
         console.log("removePlayer");
         //gsap.TweenLite.to(this.player, 10,{scale: 2, alpha: 0.5});
         this.sounds.play("yelp");
     }
-    private radians = function(degrees:number){
-      var radians = degrees * (Math.PI/180)
-      return radians%(Math.PI/180);
+    private radians = function(degrees: number) {
+        var radians = degrees * (Math.PI / 180)
+        return radians % (Math.PI / 180);
     }
-    private degrees = function(radians:number){
-      var degrees =  radians * (180/Math.PI);
-      return degrees;
+    private degrees = function(radians: number) {
+        var degrees = radians * (180 / Math.PI);
+        return degrees;
     }
     //not working
     private deltaAngle = function(source, target) {
-      var target = this.degrees(target);
-      var source = this.degrees(source);
+        var target = this.degrees(target);
+        var source = this.degrees(source);
 
-      var d = target - source;
-      var result = (d + 180) % 360 - 180;
-      result = this.radians(result);
-      return result;
+        var d = target - source;
+        var result = (d + 180) % 360 - 180;
+        result = this.radians(result);
+        return result;
     }
     //returns radians now
     private createPlayer = function(): void {
@@ -245,49 +257,43 @@ export class Gui {
         //run simulation
         this.animateSolution(ran);
     }
-    //function that the player calls after completed tween to find next square
-    //and move there would test false. pass in current, 
-    private
-    private animateSolution = function(gridIndex:number){
-      var newIndex = gridIndex
-       console.log("gridIndex", gridIndex);
-      var next:any;
-      var count = 0;
-      var testComplete = false;
-      //check set visited
-      //while(!testComplete){
-          var next = this.algorithm.getNext(this.grid[newIndex]);
-          newIndex = this.findIndex(next.x, next.y);
-          console.log("1newIndex", newIndex);
-          while(!testComplete){
-          if(newIndex){
-            if(this.grid[newIndex].visited){
-              testComplete = true;
-              this.removePlayer();
+    private animateSolution = function(gridIndex: number) {
+        var newIndex = gridIndex;
+        console.log("====gridIndex", gridIndex);
+        var next: any;
+        var runTest = true;
+        //check set visited
+        //while(!testComplete){
+        var next = this.algorithm.getNext(this.grid[newIndex]);
+        newIndex = this.findIndex(next.x, next.y);
+        console.log("1newIndex", newIndex);
+
+       do{
+         console.log("runTest");
+            if(newIndex) {
+                if (this.grid[newIndex].visited) {
+                    runTest = false;
+                    console.log("testComplete");
+                    this.tl.play();
+                    //this.removePlayer();
+                } else {
+                    this.movePlayer(newIndex, 0.4, 0, true);
+                }
+                //update next
+                next = this.algorithm.getNext(this.grid[newIndex]);
+                newIndex = this.findIndex(next.x, next.y);
             }else{
-              count++;
-              this.movePlayer(newIndex, 1, 5*count);
+              runTest = false;
             }
-          }
-        }
-        //   if(this.grid[newIndex]){
-        //     //test visited
-        //     if(this.grid[newIndex].visited){
-        //       testComplete = true;
-        //       this.removePlayer();
-        //     }else{
-        //     count++;
-        //     this.movePlayer(newIndex, 1000, 1100*count);
-        //   }
-        // }
-  //    }
+       }while(runTest)
+
     }
-    private findIndex = function(x:number, y:number){
-      for(var i=0;i<this.grid.length;i++){
-        if(this.grid[i].x == x && this.grid[i].y == y){
-          return i;
+    private findIndex = function(x: number, y: number) {
+        for (var i = 0; i < this.grid.length; i++) {
+            if (this.grid[i].x == x && this.grid[i].y == y) {
+                return i;
+            }
         }
-      }
     }
     private isEven = function(n) {
         return n % 2 == 0;
@@ -303,6 +309,7 @@ export class Gui {
         //using graphics for squares
         var squares = new PIXI.Graphics();
         let squarecolor: number;
+        this.squareArr = [];
         for (var i = 0; i < this.grid.length; i++) {
 
             // set a fill and line style
@@ -324,7 +331,10 @@ export class Gui {
             var x = (i % this.algorithm.cols) * this.algorithm.spacing;
             var y = Math.floor(i / this.algorithm.rows) * this.algorithm.spacing;
             squares.drawRect(x, y, this.algorithm.spacing, this.algorithm.spacing);
+            this.squareArr.push(squares.drawRect(x, y, this.algorithm.spacing, this.algorithm.spacing));
+            this.squarecontainer.addChild(this.squareArr[i]);
         }
+
         this.squarecontainer.addChild(squares);
 
         // Center on the screen
