@@ -40,15 +40,11 @@ export class Algorithm {
         // var randomStart = this.randomStart();
         //build linked list
         // var head = grid[randomStart];
-
         return grid;
-
     }
-
     //returns object
-    private getNext = function(current: any) { //pointer, ""
-        // console.log('direction: ' + current.direction);
-        var result = {};
+    public getNext = function(current: any):any { //current is {x:,y:,direction}
+        var result:any = {}
         if (current.direction == 1) { //right
             result = { x: current.x + 1, y: current.y };
         } else if (current.direction == 2) { //down
@@ -56,16 +52,17 @@ export class Algorithm {
         } else if (current.direction == 3) { //left
             result = { x: current.x - 1, y: current.y };
         } else if (current.direction == 0) { //up
-            result = { x: current.x, y: current.y - 1 };
+            result = { x: current.x, y: current.y - 1};
         }
-        return result;
+        // console.log(result);
+        return result; //{x:n,y:n}
     }
-    private checkLoop = function(grid, pointer):string{
-        console.log('pointer', pointer);
+    private checkLoop = function(grid, pointer):any{
+        // console.log('pointer', pointer);
         // console.log('grid', grid);
         var fast = grid[pointer]; //{x:0, y:0, direction:0-4}
         var slow = grid[pointer]; //head index //1 - 100
-        console.log("initial: " + fast.x + " | " + fast.y + " | " + slow.x + " | " + slow.y);
+        // console.log("initial: " + fast.x + " | " + fast.y + " | " + slow.x + " | " + slow.y);
 
         var counter = 0;
         do {
@@ -88,12 +85,12 @@ export class Algorithm {
             if (index != -1) {
                 fast.direction = grid[index].direction;
             }
-            console.log(fast.x + " | " + fast.y + " | " + slow.x + " | " + slow.y);
+            // console.log(fast.x + " | " + fast.y + " | " + slow.x + " | " + slow.y);
 
             if (fast.x === undefined || fast.y === undefined || fast.x < 0 || fast.y < 0 || fast.x > this._cols || fast.y > this._rows) {
-                return "off the grid";
+                return {message:"out in ",steps:counter};
             } else if (fast.x == slow.x && fast.y == slow.y) {
-                return "loop in the path";
+              return {message:"loop in ",steps:counter};
             }
         } while (counter < this._rows * this._cols);
     }
@@ -122,8 +119,8 @@ export class Algorithm {
         }
         return grid;
     }
-
-    public randomStart = function() {
+    
+    public randomStart = function() { // returns index
         let amount = this._rows * this._cols;
         return Math.floor(Math.random() * amount);
     }

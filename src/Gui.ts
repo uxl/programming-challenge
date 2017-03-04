@@ -20,23 +20,21 @@ export class Gui {
     private line: PIXI.Graphics;
     private loader = new PIXI.loaders.Loader();
     private sprites: any = {};
-
-
-    private spacing: number = 50;
     private resources: any;
     private marks: any = [];
     private player: PIXI.Sprite;
+    private playeroffsets:any;
     private squarecontainer: PIXI.Container;
     private arrowcontainer: PIXI.Container;
     private grid: any = {};
     private arrows: any = [];
-    //create container for grid
 
     constructor(mainStage: PIXI.Container, mainColors: any, mainSounds: any) {
         this.stage = mainStage;
         this.colors = mainColors;
         this.sounds = mainSounds;
         this.algorithm = new Algorithm();
+        this.playeroffsets = {x: this.algorithm.spacing/2, y: this.algorithm.spacing/2};
         this.loadImages();
     }
     private loadImages = function(): void {
@@ -152,6 +150,7 @@ export class Gui {
         //graphic offset
         var padx = this.squarecontainer.x + padx;
         var pady = this.squarecontainer.y + pady;
+
         //calculate position
         pos.x = this.grid[gridIndex].x * this.algorithm.spacing + padx;
         pos.y = this.grid[gridIndex].y * this.algorithm.spacing + pady;
@@ -181,64 +180,103 @@ export class Gui {
         this.arrowcontainer.x = (this.squarecontainer.width);
         this.arrowcontainer.y = (this.squarecontainer.height);
     }
-    private movePlayer = function(gridIndex: number): void {
-        //graphic offset
-        var padx = 25;
-        var pady = 40;
+    //takes index
+    private movePlayer = function(gridIndex: number, nduration:number, ndelay:number): void {
         //calculate position
-        var pos = this.getPosition(padx, pady, gridIndex);
+        var pos = this.getPosition(this.playeroffsets.x, this.playeroffsets.y, gridIndex);
 
-        createjs.Tween.get(this.player).to({ x: pos.x, y: pos.y, rotation: pos.angle, delay: 2000 }, 1000, createjs.Ease.quadOut);
+        console.log("this.player.rotation", this.player.rotation);
+        // console.log(" pos.angle", pos.angle);
+        //var rotate = this.deltaAngle(this.player.rotation, pos.angle);
+        // console.log("rotate", rotate);
+
+
+        createjs.Tween.get(this.player).to({ x: pos.x, y: pos.y, rotation: pos.angle, delay: ndelay }, nduration, createjs.Ease.quadOut);
     }
+    private radians = function(degrees:number){
+      var radians = degrees * (Math.PI/180)
+      return radians%(Math.PI/180);
+    }
+    private degrees = function(radians:number){
+      var degrees =  radians * (180/Math.PI);
+      return degrees;
+    }
+    //not working
+    private deltaAngle = function(source, target) {
+      var target = this.degrees(target);
+      var source = this.degrees(source);
+
+      var d = target - source;
+      var result = (d + 180) % 360 - 180;
+      result = this.radians(result);
+      return result;
+    }
+    //returns radians now
     private createPlayer = function(): void {
 
         //get random position
-        var ran = this.algorithm.randomStart();
+        var ran = 55;//this.algorithm.randomStart();
 
         //graphic offset
-        var padx = this.squarecontainer.x + 25;
-        var pady = this.squarecontainer.y + 40;
+        var padx = this.squarecontainer.x + this.playeroffsets.x;
+        var pady = this.squarecontainer.y + this.playeroffsets.y;
         //calculate position
         var posx = this.grid[ran].x * this.algorithm.spacing + padx;
         var posy = this.grid[ran].y * this.algorithm.spacing + pady;
+        // console.log(this.grid[ran]);
 
         //player
         this.player = this.sprites.player_blue;
         this.stage.addChild(this.player);
-        this.player.anchor.set(0.5, 0.8);
-        this.player.position.x = posx;
-        this.player.position.y = posy;
+        this.player.anchor.set(0.5, 0.4);
+        // this.player.position.x = posx;
+        // this.player.position.y = posy;
+        // this.player.rotation.y = posy;
+        this.movePlayer(ran, 0, 0);
 
         this.sounds.play("start");
 
 
-        //produce linkedList
-        // this.linklist = this.algorithm.createLinkedList(this.grid, ran);
+        //check outcome
         var result = this.algorithm.checkLoop(this.grid, ran);
-        this.typeMe(this.status, result, 0, 0);
 
-        //console.log(this.grid);
+        this.typeMe(this.status, result.message + " " + result.steps, 0, 0);
 
-
-
-        //test for loop
-        //return step loop appears
-
-
-        //create loop to animate result
-
-
-
-        //move test
-        //this.movePlayer(this.algorithm.randomStart());
+        //run simulation
+        this.animateSolution(ran, result.steps);
     }
+    private animateSolution = function(gridIndex:number, steps:number){
+      var newIndex = gridIndex
+       console.log("gridIndex", gridIndex);
+      // console.log("steps", steps);
 
+      //var next:any = this.algorithm.getNext(this.grid[gridIndex]); //returns {x:n, y:n}
+      var next:any;
+      // // console.log("snext", next);
+      //
+      var count = 0;
+      for(let i:number = 0; i < steps; i++){
+          var next = this.algorithm.getNext(this.grid[newIndex]);
+          console.log("next:", next);
+          newIndex = this.findIndex(next.x, next.y);
+          console.log("newindex:", newIndex);
+          this.movePlayer(newIndex, 1000, 1100*count);
+          // this.animateSolution(newIndex, steps--)
+        // console.log("this.grid[newIndex]",this.grid[newIndex]);
+      }
+    }
+    private findIndex = function(x:number, y:number){
+      for(var i=0;i<this.grid.length;i++){
+        if(this.grid[i].x == x && this.grid[i].y == y){
+          return i;
+        }
+      }
+    }
     private isEven = function(n) {
         return n % 2 == 0;
     }
     private drawGrid = function() {
         this.grid = this.algorithm.reset();
-
         if (this.squarecontainer) {
             this.squarecontainer.destroy(true);
         }
