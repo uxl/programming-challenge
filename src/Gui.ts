@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import { Btn } from "./Btn";
 import { Algorithm } from "./Algorithm";
-import * as createjs from "createjs-browserify";
+import * as gsap from "gsap";
 
 
 export class Gui {
@@ -155,6 +155,7 @@ export class Gui {
         pos.x = this.grid[gridIndex].x * this.algorithm.spacing + padx;
         pos.y = this.grid[gridIndex].y * this.algorithm.spacing + pady;
         pos.angle = ((this.grid[gridIndex].direction * 90) * Math.PI / 180);
+        // console.log(this.degrees(pos.angle));
         return pos;
     }
     //make arrows
@@ -165,7 +166,6 @@ export class Gui {
         }
       }
       this.arrows = [];
-
         for (var i = 0; i < this.grid.length; i++) {
           this.arrows.push(new PIXI.Sprite(this.loader.resources.arrow_direction.texture));
           this.stage.addChild(this.arrows[i]);
@@ -173,7 +173,8 @@ export class Gui {
             var padx = 25;
             var pady = 25;
             var pos = this.getPosition(padx, pady, i);
-            createjs.Tween.get(this.arrows[i]).to({x: pos.x, y: pos.y, rotation: pos.angle, delay: 10*i }, 1);
+            gsap.TweenLite.to(this.arrows[i].position, 0, {x: pos.x, y:pos.y});
+            gsap.TweenLite.to(this.arrows[i], 0, {directionalRotation:{rotation: (pos.angle + '_short'), useRadians: true}});
         }
         // this.arrowcontainer.x = (this.squarecontainer.width);
         // this.arrowcontainer.y = (this.squarecontainer.height);
@@ -185,13 +186,17 @@ export class Gui {
         //calculate position
         var pos = this.getPosition(this.playeroffsets.x, this.playeroffsets.y, gridIndex);
 
-        console.log("this.player.rotation", this.player.rotation);
-        // console.log(" pos.angle", pos.angle);
-        //var rotate = this.deltaAngle(this.player.rotation, pos.angle);
-        // console.log("rotate", rotate);
+        //set visited
+        this.grid[gridIndex].visited = true;
 
-
-        createjs.Tween.get(this.player).to({ x: pos.x, y: pos.y, rotation: pos.angle, delay: ndelay }, nduration, createjs.Ease.quadOut);
+        gsap.TweenLite.to(this.player.position, nduration, {x: pos.x,y: pos.y, delay:ndelay});
+        gsap.TweenLite.to(this.player, nduration,{rotation: pos.angle, delay:ndelay});
+        // createjs.Tween.get(this.player).to({ x: pos.x, y: pos.y, rotation: pos.angle, delay: ndelay }, nduration, createjs.Ease.quadOut);
+    }
+    private removePlayer = function(): void {
+        console.log("removePlayer");
+        //gsap.TweenLite.to(this.player, 10,{scale: 2, alpha: 0.5});
+        this.sounds.play("yelp");
     }
     private radians = function(degrees:number){
       var radians = degrees * (Math.PI/180)
@@ -215,7 +220,7 @@ export class Gui {
     private createPlayer = function(): void {
 
         //get random position
-        var ran = 55;//this.algorithm.randomStart();
+        var ran = this.algorithm.randomStart();
 
         //graphic offset
         var padx = this.squarecontainer.x + this.playeroffsets.x;
@@ -229,41 +234,53 @@ export class Gui {
         this.player = this.sprites.player_blue;
         this.stage.addChild(this.player);
         this.player.anchor.set(0.5, 0.4);
-        // this.player.position.x = posx;
-        // this.player.position.y = posy;
-        // this.player.rotation.y = posy;
         this.movePlayer(ran, 0, 0);
-
         this.sounds.play("start");
-
 
         //check outcome
         var result = this.algorithm.checkLoop(this.grid, ran);
 
-        this.typeMe(this.status, result.message + " " + result.steps, 0, 0);
+        this.typeMe(this.status, result.message, 0, 0);
 
         //run simulation
-        this.animateSolution(ran, result.steps);
+        this.animateSolution(ran);
     }
-    private animateSolution = function(gridIndex:number, steps:number){
+    //function that the player calls after completed tween to find next square
+    //and move there would test false. pass in current, 
+    private
+    private animateSolution = function(gridIndex:number){
       var newIndex = gridIndex
        console.log("gridIndex", gridIndex);
-      // console.log("steps", steps);
-
-      //var next:any = this.algorithm.getNext(this.grid[gridIndex]); //returns {x:n, y:n}
       var next:any;
-      // // console.log("snext", next);
-      //
       var count = 0;
-      for(let i:number = 0; i < steps; i++){
+      var testComplete = false;
+      //check set visited
+      //while(!testComplete){
           var next = this.algorithm.getNext(this.grid[newIndex]);
-          console.log("next:", next);
           newIndex = this.findIndex(next.x, next.y);
-          console.log("newindex:", newIndex);
-          this.movePlayer(newIndex, 1000, 1100*count);
-          // this.animateSolution(newIndex, steps--)
-        // console.log("this.grid[newIndex]",this.grid[newIndex]);
-      }
+          console.log("1newIndex", newIndex);
+          while(!testComplete){
+          if(newIndex){
+            if(this.grid[newIndex].visited){
+              testComplete = true;
+              this.removePlayer();
+            }else{
+              count++;
+              this.movePlayer(newIndex, 1, 5*count);
+            }
+          }
+        }
+        //   if(this.grid[newIndex]){
+        //     //test visited
+        //     if(this.grid[newIndex].visited){
+        //       testComplete = true;
+        //       this.removePlayer();
+        //     }else{
+        //     count++;
+        //     this.movePlayer(newIndex, 1000, 1100*count);
+        //   }
+        // }
+  //    }
     }
     private findIndex = function(x:number, y:number){
       for(var i=0;i<this.grid.length;i++){
@@ -326,6 +343,7 @@ export class Gui {
         // draw a shape
         this.line.moveTo(100, window.innerHeight - 70);
         this.line.lineTo(window.innerWidth - 100, window.innerHeight - 70);
+        this.sounds.play("move");
 
         this.stage.addChild(this.line);
     }
@@ -394,9 +412,7 @@ export class Gui {
         setTimeout(this.drawGrid.bind(this), 6000);
     }
     private typeMe = function(textObj: PIXI.Text, message: string, messageLength: number, delay: number): void {
-        // console.log(message + ' | ' + messageLength);
         if (messageLength === undefined) {
-            // console.log("starting type");
             textObj.text = "";
             messageLength = 0;
         }
@@ -407,13 +423,12 @@ export class Gui {
         if (messageLength >= 1) {
             this.sounds.play("keypress");
         }
-        // console.log(newString);
+
         //increment length of message
         messageLength++;
 
         if (messageLength < message.length + 1) {
             setTimeout(this.typeMe.bind(this, textObj, message, messageLength, 50), delay);
-            // setTimeout(this.declare.bind(this), 1000);
         }
 
     }

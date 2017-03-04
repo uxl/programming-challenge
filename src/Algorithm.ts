@@ -43,7 +43,7 @@ export class Algorithm {
         return grid;
     }
     //returns object
-    public getNext = function(current: any):any { //current is {x:,y:,direction}
+    public getNext = function(current: any):any { //{x:,y:,direction}
         var result:any = {}
         if (current.direction == 1) { //right
             result = { x: current.x + 1, y: current.y };
@@ -88,9 +88,9 @@ export class Algorithm {
             // console.log(fast.x + " | " + fast.y + " | " + slow.x + " | " + slow.y);
 
             if (fast.x === undefined || fast.y === undefined || fast.x < 0 || fast.y < 0 || fast.x > this._cols || fast.y > this._rows) {
-                return {message:"out in ",steps:counter};
+              return {message:"off grid detected ", steps:counter};
             } else if (fast.x == slow.x && fast.y == slow.y) {
-              return {message:"loop in ",steps:counter};
+              return {message:"loop detected ", steps:counter};
             }
         } while (counter < this._rows * this._cols);
     }
@@ -105,7 +105,7 @@ export class Algorithm {
             }
         }
         if (!found) {
-            return -1; //TEST FILLED OFF BOARD
+            return -1;
         }
     }
 
@@ -114,12 +114,12 @@ export class Algorithm {
         let grid: object[] = [];
         for (var i = 0; i < amount; i++) {
             let dir = Math.floor(Math.random() * 4);
-            var cell = { x: (i % this._cols), y: Math.floor(i / this._rows), direction: dir };
+            var cell = { x: (i % this._cols), y: Math.floor(i / this._rows), direction: dir, visited: false };
             grid.push(cell);
         }
         return grid;
     }
-    
+
     public randomStart = function() { // returns index
         let amount = this._rows * this._cols;
         return Math.floor(Math.random() * amount);
