@@ -30,9 +30,21 @@ export class Gui {
     private grid: any = {};
     private arrows: any = [];
     private tl: gsap.TimelineLite;
-    private squareArr: PIXI.Graphics[];
+    private squareArr: any = [];
+    private ran: number = -1;
+    private steps: number = 0;
 
-    private isPlaying:boolean = false;
+    private isPlaying: boolean = false;
+    private score: any = { off: 0, loop: 0 };
+    private cycles: number = 0;
+    private stepsAverage: number = 0;
+    private steps_average: PIXI.Text;
+    private score_off: PIXI.Text;
+    private score_looped: PIXI.Text;
+
+    private playButton: Btn;
+    private pauseButton: Btn;
+    private resetButton: Btn;
 
     constructor(mainStage: PIXI.Container, mainColors: any, mainSounds: any) {
         this.stage = mainStage;
@@ -40,18 +52,40 @@ export class Gui {
         this.sounds = mainSounds;
         this.algorithm = new Algorithm();
         this.playeroffsets = { x: this.algorithm.spacing / 2, y: this.algorithm.spacing / 2 };
-        this.tl = new gsap.TimelineLite({ paused: true });
+        this.tl = new gsap.TimelineLite({ paused: true});
         this.loadImages();
     }
-    private playToggle = function(){
-      this.isPlaying ? this.isPlaying = false : this.isPlaying = true;
-      if(this.isPlaying){
-        console.log("play!");
-        this.tl.play();
-      }else{
-        console.log("pause!");
-        this.tl.pause();
-      }
+
+    public windowResize = function() {
+        //fix textpos
+        console.log("resizeWindow");
+
+        this.resetButton.x = window.innerWidth - 200;
+        this.pauseButton.x = window.innerWidth - 250;
+        this.playButton.x = window.innerWidth - 300;
+
+        if (this.squaresContainer) {
+            this.squaresContainer.x = (window.innerWidth - this.squaresContainer.width) / 2;
+            this.squaresContainer.y = (window.innerHeight - this.squaresContainer.height) / 2;
+        }
+    }
+    private cooldown = function() {
+        setTimeout(function() {
+            this.drawGrid();
+        }.bind(this), 3000);
+    }
+    private playToggle = function(request: boolean) {
+        if (request) {
+            if (!this.isPlaying) {
+                this.isPlaying = true;
+                this.createPlayer();
+            }
+        } else {
+            if (this.isPlaying) {
+                this.tl.pause();
+                this.isPlaying = false;
+            }
+        }
     }
     private loadImages = function(): void {
         //load images'
@@ -138,45 +172,49 @@ export class Gui {
     }
     private createButtons = function() {
 
-        var resetButton = new Btn(this.stage, this.loader.resources, "reset", "reset", window.innerWidth - 200, window.innerHeight - 30, function() {
+        this.resetButton = new Btn(this.stage, this.loader.resources, "reset", "reset", window.innerWidth - 200, window.innerHeight - 30, function() {
             //factory method would be good
             //clear scores
+            console.log("reset button pressed");
 
-            this.isPlaying = true;
-            this.playToggle();
+            this.score = { off: 0, loop: 0 };
+            this.updateScore();
 
-        }.bind(this));
-        var pauseButton = new Btn(this.stage, this.loader.resources, "pause", "pause", window.innerWidth - 250, window.innerHeight - 30, function() {
-            this.playToggle();
-
-        }.bind(this));
-        var playButton = new Btn(this.stage, this.loader.resources, "play", "play", window.innerWidth - 300, window.innerHeight - 30, function() {
-            //factory method?
             this.isPlaying = false;
-            this.playToggle();
+            this.playToggle(false);
 
         }.bind(this));
+        this.pauseButton = new Btn(this.stage, this.loader.resources, "pause", "pause", window.innerWidth - 250, window.innerHeight - 30, function() {
+            this.playToggle(false);
+            console.log("pause button pressed");
+        }.bind(this));
 
+        this.playButton = new Btn(this.stage, this.loader.resources, "play", "play", window.innerWidth - 300, window.innerHeight - 30, function() {
+            //factory method?
+            this.playToggle(true);
+            console.log("play button pressed");
 
-        var rowsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "rowsup", 405, window.innerHeight - 45, function() {
+        }.bind(this));
+        this.rowsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "rowsup", 405, window.innerHeight - 45, function() {
             //update board/matrix
             this.increaseGrid();
             this.drawGrid();
 
         }.bind(this));
-        var rowsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", "rowdown", 400, window.innerHeight - 30, function() {
+        this.rowsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", "rowdown", 400, window.innerHeight - 30, function() {
             //update board/matrix
             this.reduceGrid();
             this.drawGrid();
 
         }.bind(this));
-        var colsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "colsup", 605, window.innerHeight - 45, function() {
+
+        this.colsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "colsup", 605, window.innerHeight - 45, function() {
             //update board/matrix
             this.increaseGrid();
             this.drawGrid();
 
         }.bind(this));
-        var colsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", "colsdown", 600, window.innerHeight - 30, function() {
+        this.colsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", "colsdown", 600, window.innerHeight - 30, function() {
             //update board/matrix
             this.reduceGrid();
             this.drawGrid();
@@ -230,8 +268,9 @@ export class Gui {
         var visitedFilter = new PIXI.filters.BlurFilter();
         this.squareArr[gridIndex].filters = [visitedFilter];
         visitedFilter.blur = 0;
-
-
+        if(this.tl.length < 1){
+          ndelay = 2;
+        }
         //set up transition
         if (queue) {
             // console.log("queueing:" + gridIndex);
@@ -273,14 +312,14 @@ export class Gui {
     private createPlayer = function(): void {
 
         //get random position
-        var ran = this.algorithm.randomStart();
+        this.ran = this.algorithm.randomStart();
 
         //graphic offset
         var padx = this.squaresContainer.x + this.playeroffsets.x;
         var pady = this.squaresContainer.y + this.playeroffsets.y;
         //calculate position
-        var posx = this.grid[ran].x * this.algorithm.spacing + padx;
-        var posy = this.grid[ran].y * this.algorithm.spacing + pady;
+        var posx = this.grid[this.ran].x * this.algorithm.spacing + padx;
+        var posy = this.grid[this.ran].y * this.algorithm.spacing + pady;
         // console.log(this.grid[ran]);
 
         //player
@@ -288,23 +327,26 @@ export class Gui {
         this.stage.addChild(this.player);
         this.player.anchor.set(0.5, 0.4);
 
-        //clear timeline
-        this.tl.clear();
-
-        this.movePlayer(ran, 0, 0);
+        this.movePlayer(this.ran, 0, 0);
         this.sounds.play("start");
 
         //check outcome
-        var result = this.algorithm.checkLoop(this.grid, ran);
-
+        var result = this.algorithm.checkLoop(this.grid, this.ran);
         this.typeMe(this.status, result.message, 0, 0);
 
         //run simulation
-        if(this.isPlaying){
-          this.animateSolution(ran);
+        if (this.isPlaying) {
+            this.runSolution(this.ran);
         }
     }
-    private animateSolution = function(gridIndex: number) {
+    private runSolution = function(gridIndex: number) {
+        console.log("runSolution");
+        //flag ran so that we don't call animate without picking a new random
+        this.ran = -1;
+
+        //clear timeline
+        this.tl.clear();
+
         var newIndex = gridIndex;
         // console.log("====gridIndex", gridIndex);
         var next: any;
@@ -313,23 +355,30 @@ export class Gui {
         //while(!testComplete){
         var next = this.algorithm.getNext(this.grid[newIndex]);
         newIndex = this.findIndex(next.x, next.y);
-        console.log("1newIndex", newIndex);
+        // console.log("1newIndex", newIndex);
+
         var count = 0;
         do {
+            this.steps++;
             console.log("runTest");
             if (newIndex) {
                 if (this.grid[newIndex].visited) {
-                    runTest = false;
-                    console.log("testComplete");
-                    this.tl.play();
+                    console.log("test complete");
+                    this.updateScore({ team: "loop", steps: this.steps });
                     //this.removePlayer();
                 } else {
-                    this.movePlayer(newIndex, 0.2, 0, true);
+
+                    this.movePlayer(newIndex, 1, 0, true);
+                    this.tl.play();
+
                 }
                 //update next
                 next = this.algorithm.getNext(this.grid[newIndex]);
                 newIndex = this.findIndex(next.x, next.y);
+                runTest = false;
             } else {
+                console.log("detected out of bounds")
+                this.updateScore({ team: "off", steps: this.steps });
                 runTest = false;
             }
         } while (runTest)
@@ -346,29 +395,35 @@ export class Gui {
         return n % 2 == 0;
     }
     private drawGrid = function() {
+        if (this.squareArr.length > 0) {
+            for (var i = 0; i < this.squareArr.length; i++) {
+                this.squareArr[i].destroy(true, true, true);
+            }
+            this.squareArr = [];
+        }
         this.grid = this.algorithm.reset();
         if (this.squaresContainer) {
-            this.squaresContainer.destroy();
+            this.squaresContainer.destroy(true, true, true);
         }
         this.squaresContainer = new PIXI.Container();
         this.stage.addChild(this.squaresContainer);
 
         //using graphics for squares
-        let squarecolor: number;
+        var squarecolor: number;
         this.squareArr = [];
         for (var i = 0; i < this.grid.length; i++) {
             // set a fill and line style
-            if (this.isEven(Math.floor(i / this.algorithm.rows))) {
-                if (this.isEven(i)) {
-                    squarecolor = this.colors.squaredark
-                } else {
-                    squarecolor = this.colors.squarelight
+            if (this.isEven(Math.floor(i / this.algorithm.rows))) { // if even row
+                if (this.isEven(i)) { //if even
+                    squarecolor = this.colors.squaredark;
+                } else { //if odd
+                    squarecolor = this.colors.squarelight;
                 }
-            } else {
-                if (this.isEven(i)) {
-                    squarecolor = this.colors.squarelight
-                } else {
-                    squarecolor = this.colors.squaredark
+            } else { //if odd row
+                if (this.isEven(i)) { //if even
+                    squarecolor = this.colors.squarelight;
+                } else { //if odd
+                    squarecolor = this.colors.squaredark;
                 }
             }
             var squareContainer = new PIXI.Container();
@@ -381,9 +436,9 @@ export class Gui {
             square.drawRect(x, y, this.algorithm.spacing, this.algorithm.spacing);
             squareContainer.addChild(square);
             squareContainer.alpha = 0;
-            gsap.TweenLite.to(squareContainer, (Math.random()*0.5),{alpha:0.8, delay: (Math.random()*1)});
             this.squareArr.push(squareContainer);
             this.squaresContainer.addChild(this.squareArr[i]);
+            gsap.TweenLite.to(this.squareArr[i], 0.2, { alpha: 1, delay: Math.random() });
         }
 
         // this.squaresContainer.addChild(squares);
@@ -391,8 +446,12 @@ export class Gui {
         // Center on the screen
         this.squaresContainer.x = (window.innerWidth - this.squaresContainer.width) / 2;
         this.squaresContainer.y = (window.innerHeight - this.squaresContainer.height) / 2;
-        this.createPlayer();
         this.createArrows();
+        setTimeout(function() {
+            if (this.isPlaying) {
+                this.createPlayer();
+            }
+        }.bind(this), 2000);
     }
 
     private createLine = function(): void {
@@ -430,6 +489,27 @@ export class Gui {
             wordWrap: true,
             wordWrapWidth: 440
         });
+        this.steps_average = new PIXI.Text('...', headline);
+        this.steps_average.x = 110;
+        this.steps_average.y = 50;
+
+        this.stage.addChild(this.steps_average);
+        this.typeMe(this.steps_average, "average steps: 0", 0, 2000);
+
+        this.score_off = new PIXI.Text('...', headline);
+        this.score_off.x = 350;
+        this.score_off.y = 50;
+
+        this.stage.addChild(this.score_off);
+        this.typeMe(this.score_off, "offgrid: 0", 0, 2000);
+
+        this.score_looped = new PIXI.Text('...', headline);
+        this.score_looped.x = 500;
+        this.score_looped.y = 50;
+
+        this.stage.addChild(this.score_looped);
+        this.typeMe(this.score_looped, "looped: 0", 0, 2000);
+
         //status
         this.status = new PIXI.Text('...', headline);
         this.status.x = 110;
@@ -471,6 +551,25 @@ export class Gui {
         this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 5000);
         this.typeMe(this.status, "Ready", 0, 6000);
         setTimeout(this.drawGrid.bind(this), 6000);
+    }
+    private updateScore = function(data: any) {
+        console.log("==============updateScore");
+
+        this.steps = 0;
+        if (data.team == 'off') {
+            this.score.off++;
+            this.typeMe(this.score_off, "offgrid: " + this.score.off.toString(), 0, 2000);
+        }
+        if (data.team == 'loop') {
+            this.score.loop++;
+            this.typeMe(this.score_looped, "looped: " + this.score.loop.toString(), 0, 2000);
+        }
+        if (data.steps) {
+            this.cycles++;
+            this.stepsAverage = (((this.stopsAverage * this.cycles) + data.steps) / (this.cycles + 1));
+            this.typeMe(this.average_steps, "average steps: " + this.score.loop.toString(), 0, 2000);
+        }
+        this.cooldown();
     }
     private typeMe = function(textObj: PIXI.Text, message: string, messageLength: number, delay: number): void {
         if (messageLength === undefined) {

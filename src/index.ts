@@ -77,17 +77,7 @@ let gameLoop = function():void{
 }
 
 
-// //Resize electron window
-// window.onresize = function (event):void{
-//   updateRendererSize();
-// }
-// //Handles update of Canvas and Elements
-// let updateRendererSize = function():void{
-//   let w = window.innerWidth;
-//   let h = window.innerHeight;
-//   //this part resizes the canvas but keeps ratio the same
-//   // app.view.style.width = w + "px";
-//   // app.view.style.height = h + "px";
-//   //this part adjusts the ratio:
-//   renderer.resize(w,h);
-// }
+//Resize electron window
+window.onresize = function (event):void{
+  maingui.windowResize();
+};
