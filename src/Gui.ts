@@ -6,7 +6,7 @@ import gsap = require('gsap');
 // import TweenLite = require('gsap/src/uncompressed/TweenLite.js');
 
 export class Gui {
-    private isPredictive: boolean = true;
+    private isBigO1: boolean = true;
 
     private stage: PIXI.Container;
     private algorithm: Algorithm;
@@ -14,7 +14,8 @@ export class Gui {
     private sounds: any;
 
     //text elements
-    private status: PIXI.Text;
+    private bigO1: PIXI.Text;
+    private bigOn: PIXI.Text;
     private rowsTitle: PIXI.Text;
     private rowsValue: PIXI.Text;
     private colsTitle: PIXI.Text;
@@ -329,9 +330,9 @@ export class Gui {
         this.sounds.play("start");
 
         //check outcome
-        if (this.isPredictive) {
+        if (this.isBigO1) {
             var result = this.algorithm.checkLoop(this.grid, this.ran);
-            this.typeMe(this.status, result.message, 0, 0);
+            this.bigO1.text = result.message;
         }
         //run simulation
         if (this.isPlaying) {
@@ -355,6 +356,8 @@ export class Gui {
         do {
             this.steps++;
             if (newIndex) {
+                // this.typeMe(this.bigOn, "O(n): loop", 0, 0);
+                this.bigOn.text = "O(n): loop";
                 console.log("loop detected during animation");
                 //loop detected
                 if (this.grid[newIndex].visited) {
@@ -368,6 +371,9 @@ export class Gui {
                     newIndex = this.findIndex(next.x, next.y);
                 }
             } else {
+                this.bigOn.text = "O(n): off grid";
+                // this.typeMe(this.bigOn, "O(n): off grid", 0, 0);
+
                 console.log("out of bounds detected during animation");
                 this.updateScore({ team: "off", steps: this.steps });
                 this.tl.add(gsap.TweenLite.to(this, 2, {}));
@@ -489,32 +495,39 @@ export class Gui {
         });
         this.steps_average = new PIXI.Text('...', headline);
         this.steps_average.x = 110;
-        this.steps_average.y = 50;
+        this.steps_average.y = 240;
 
         this.stage.addChild(this.steps_average);
         this.typeMe(this.steps_average, "average steps: 0", 0, 2000);
 
         this.score_off = new PIXI.Text('...', headline);
-        this.score_off.x = 350;
-        this.score_off.y = 50;
+        this.score_off.x = 110;
+        this.score_off.y = 200;
 
         this.stage.addChild(this.score_off);
         this.typeMe(this.score_off, "offgrid: 0", 0, 2000);
 
         this.score_looped = new PIXI.Text('...', headline);
-        this.score_looped.x = 500;
-        this.score_looped.y = 50;
+        this.score_looped.x = 110;
+        this.score_looped.y = 160;
 
         this.stage.addChild(this.score_looped);
         this.typeMe(this.score_looped, "looped: 0", 0, 2000);
 
         //status
-        this.status = new PIXI.Text('...', headline);
-        this.status.x = 110;
-        this.status.y = window.innerHeight - 50;
+        this.bigOn = new PIXI.Text('...', headline);
+        this.bigOn.x = 110;
+        this.bigOn.y = 50;
 
-        this.stage.addChild(this.status);
-        this.typeMe(this.status, "Initializing...", 0, 2000);
+        this.stage.addChild(this.bigOn);
+        this.typeMe(this.bigOn, "O(n): ready", 0, 2000);
+
+        this.bigO1 = new PIXI.Text('...', headline);
+        this.bigO1.x = 110;
+        this.bigO1.y = 90;
+
+        this.stage.addChild(this.bigO1);
+        this.typeMe(this.bigO1, "O(1): ready", 0, 2000);
 
         //rows title
         this.rowsTitle = new PIXI.Text('...', style);
@@ -547,7 +560,6 @@ export class Gui {
 
         this.stage.addChild(this.colsValue);
         this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 5000);
-        this.typeMe(this.status, "Ready", 0, 6000);
 
         setTimeout(this.drawGrid.bind(this), 6000);
     }

@@ -49,7 +49,7 @@ export class Algorithm {
         }
         return grid;
     }
-    
+
     //pick random start position - returns index
     public randomStart = function() {
         let amount = this._rows * this._cols;
@@ -98,9 +98,9 @@ export class Algorithm {
                 fast.direction = grid[index].direction;
             }
             if (fast.x === undefined || fast.y === undefined || fast.x < 0 || fast.y < 0 || fast.x > this._cols || fast.y > this._rows) {
-              return {message:"off grid detected ", steps:counter};
+              return {message:"O(1): off grid", steps:counter};
             } else if (fast.x == slow.x && fast.y == slow.y) {
-              return {message:"loop detected ", steps:counter};
+              return {message:"O(1): loop", steps:counter};
             }
         } while (counter < this._rows * this._cols);
     }
