@@ -276,7 +276,7 @@ export class Gui {
             // console.log("queueing:" + gridIndex);
             this.tl.add(gsap.TweenLite.to(this.player.position, nduration, { x: pos.x, y: pos.y, delay: ndelay }));
             this.tl.add(gsap.TweenLite.to(this.player, nduration, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true }, delay: ndelay }));
-            this.tl.add(gsap.TweenLite.to(visitedFilter, 1, { blur: 10, ease: gsap.quadIn, delay: 0 }));
+            this.tl.add(gsap.TweenLite.to(visitedFilter, 0.3, { blur: 10, ease: gsap.quadIn, delay: 0 }));
         } else {
             // console.log("immediate");
             // console.log("this.player", this.player);
@@ -365,7 +365,7 @@ export class Gui {
                 console.log("3runTest");
                 if (this.grid[newIndex].visited) { //loop detected
                     console.log("4test complete - loop")
-                    this.movePlayer(newIndex, 0.3, 0, true);
+                    // this.movePlayer(newIndex, 0.3, 0, true);
                     this.updateScore({ team: "loop", steps: this.steps });
                     runTest = false;
                     this.tl.play();
@@ -441,7 +441,7 @@ export class Gui {
             squareContainer.alpha = 0;
             this.squareArr.push(squareContainer);
             this.squaresContainer.addChild(this.squareArr[i]);
-            gsap.TweenLite.to(this.squareArr[i], 0.2, { alpha: 1, delay: Math.random() });
+            gsap.TweenLite.to(this.squareArr[i], 0.1, { alpha: 1, delay: Math.random()*0.4 });
         }
 
         // this.squaresContainer.addChild(squares);
