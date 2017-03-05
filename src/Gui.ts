@@ -152,8 +152,8 @@ export class Gui {
     private getPosition = function(padx, pady, gridIndex: number) {
         var pos: any = {};
         //graphic offset
-        var padx = this.squarecontainer.x + padx;
-        var pady = this.squarecontainer.y + pady;
+        var padx = this.squaresContainer.x + padx;
+        var pady = this.squaresContainer.y + pady;
 
         //calculate position
         pos.x = this.grid[gridIndex].x * this.algorithm.spacing + padx;
@@ -180,10 +180,10 @@ export class Gui {
             gsap.TweenLite.to(this.arrows[i].position, 0, { x: pos.x, y: pos.y });
             gsap.TweenLite.to(this.arrows[i], 0, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true } });
         }
-        // this.arrowcontainer.x = (this.squarecontainer.width);
-        // this.arrowcontainer.y = (this.squarecontainer.height);
-        this.arrowcontainer.x = (this.squarecontainer.width);
-        this.arrowcontainer.y = (this.squarecontainer.height);
+        // this.arrowcontainer.x = (this.squaresContainer.width);
+        // this.arrowcontainer.y = (this.squaresContainer.height);
+        this.arrowcontainer.x = (this.squaresContainer.width);
+        this.arrowcontainer.y = (this.squaresContainer.height);
     }
     //takes index, duration, delay and if you want to queue multiple events onto timeline
     private movePlayer = function(gridIndex: number, nduration: number, ndelay: number, queue: boolean): void {
@@ -193,16 +193,23 @@ export class Gui {
         //set visited
         this.grid[gridIndex].visited = true;
 
+        var visitedFilter = new PIXI.filters.BlurFilter();
+        this.squareArr[gridIndex].filters = [visitedFilter];
+        visitedFilter.blur = 0;
+
+
         //set up transition
         if (queue) {
-            console.log("queueing:" + gridIndex);
+            // console.log("queueing:" + gridIndex);
             this.tl.add(gsap.TweenLite.to(this.player.position, nduration, { x: pos.x, y: pos.y, delay: ndelay }));
             this.tl.add(gsap.TweenLite.to(this.player, nduration, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true } , delay: ndelay }));
+            this.tl.add(gsap.TweenLite.to(visitedFilter, nduration, { blur:10, ease:gsap.quadIn , delay: ndelay }));
         } else {
-            console.log("immediate");
+            // console.log("immediate");
             // console.log("this.player", this.player);
             gsap.TweenLite.to(this.player.position, nduration, { x: pos.x, y: pos.y, delay: ndelay });
             gsap.TweenLite.to(this.player, nduration, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true }, delay: ndelay },0);
+            gsap.TweenLite.to(visitedFilter, nduration, { blur:10, ease:gsap.quadIn , delay: ndelay });
         }
     }
     private removePlayer = function(): void {
@@ -235,8 +242,8 @@ export class Gui {
         var ran = this.algorithm.randomStart();
 
         //graphic offset
-        var padx = this.squarecontainer.x + this.playeroffsets.x;
-        var pady = this.squarecontainer.y + this.playeroffsets.y;
+        var padx = this.squaresContainer.x + this.playeroffsets.x;
+        var pady = this.squaresContainer.y + this.playeroffsets.y;
         //calculate position
         var posx = this.grid[ran].x * this.algorithm.spacing + padx;
         var posy = this.grid[ran].y * this.algorithm.spacing + pady;
@@ -246,6 +253,10 @@ export class Gui {
         this.player = this.sprites.player_blue;
         this.stage.addChild(this.player);
         this.player.anchor.set(0.5, 0.4);
+
+        //clear timeline
+        this.tl.clear();
+
         this.movePlayer(ran, 0, 0);
         this.sounds.play("start");
 
@@ -259,7 +270,7 @@ export class Gui {
     }
     private animateSolution = function(gridIndex: number) {
         var newIndex = gridIndex;
-        console.log("====gridIndex", gridIndex);
+        // console.log("====gridIndex", gridIndex);
         var next: any;
         var runTest = true;
         //check set visited
@@ -267,7 +278,7 @@ export class Gui {
         var next = this.algorithm.getNext(this.grid[newIndex]);
         newIndex = this.findIndex(next.x, next.y);
         console.log("1newIndex", newIndex);
-
+        var count = 0;
        do{
          console.log("runTest");
             if(newIndex) {
@@ -277,7 +288,7 @@ export class Gui {
                     this.tl.play();
                     //this.removePlayer();
                 } else {
-                    this.movePlayer(newIndex, 0.4, 0, true);
+                    this.movePlayer(newIndex, 0.2, 0, true);
                 }
                 //update next
                 next = this.algorithm.getNext(this.grid[newIndex]);
@@ -300,18 +311,16 @@ export class Gui {
     }
     private drawGrid = function() {
         this.grid = this.algorithm.reset();
-        if (this.squarecontainer) {
-            this.squarecontainer.destroy(true);
+        if (this.squaresContainer) {
+            this.squaresContainer.destroy(true);
         }
-        this.squarecontainer = new PIXI.Container();
-        this.stage.addChild(this.squarecontainer);
+        this.squaresContainer = new PIXI.Container();
+        this.stage.addChild(this.squaresContainer);
 
         //using graphics for squares
-        var squares = new PIXI.Graphics();
         let squarecolor: number;
         this.squareArr = [];
         for (var i = 0; i < this.grid.length; i++) {
-
             // set a fill and line style
             if (this.isEven(Math.floor(i / this.algorithm.rows))) {
                 if (this.isEven(i)) {
@@ -326,20 +335,24 @@ export class Gui {
                     squarecolor = this.colors.squaredark
                 }
             }
-            squares.beginFill(squarecolor, 0.5);
-            squares.lineStyle(1, this.colors.lines, 1);
+            var squareContainer = new PIXI.Container();
+            var square = new PIXI.Graphics();
+            square.beginFill(squarecolor, 0.5);
+            square.lineStyle(1, this.colors.lines, 1);
             var x = (i % this.algorithm.cols) * this.algorithm.spacing;
             var y = Math.floor(i / this.algorithm.rows) * this.algorithm.spacing;
-            squares.drawRect(x, y, this.algorithm.spacing, this.algorithm.spacing);
-            this.squareArr.push(squares.drawRect(x, y, this.algorithm.spacing, this.algorithm.spacing));
-            this.squarecontainer.addChild(this.squareArr[i]);
+            square.drawRect(x, y, this.algorithm.spacing, this.algorithm.spacing);
+            square.drawRect(x, y, this.algorithm.spacing, this.algorithm.spacing);
+            squareContainer.addChild(square);
+            this.squareArr.push(squareContainer);
+            this.squaresContainer.addChild(this.squareArr[i]);
         }
 
-        this.squarecontainer.addChild(squares);
+        // this.squaresContainer.addChild(squares);
 
         // Center on the screen
-        this.squarecontainer.x = (window.innerWidth - this.squarecontainer.width) / 2;
-        this.squarecontainer.y = (window.innerHeight - this.squarecontainer.height) / 2;
+        this.squaresContainer.x = (window.innerWidth - this.squaresContainer.width) / 2;
+        this.squaresContainer.y = (window.innerHeight - this.squaresContainer.height) / 2;
         this.createPlayer();
         this.createArrows();
     }
