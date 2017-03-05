@@ -1,3 +1,21 @@
+## To Run
+
+```
+git clone https://github.com/uxl/programming-challenge
+```
+```
+npm install
+```
+```
+npm run watch
+```
+```
+npm electron main.js
+```
+
+
+
+
 ## Prereqs
 
 Install [Node.js 4.5.0](https://nodejs.org/en/). This will also install `npm` as a global command.
