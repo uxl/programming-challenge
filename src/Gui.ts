@@ -52,19 +52,20 @@ export class Gui {
         this.sounds = mainSounds;
         this.algorithm = new Algorithm();
         this.playeroffsets = { x: this.algorithm.spacing / 2, y: this.algorithm.spacing / 2 };
-        this.tl = new gsap.TimelineLite({ paused: true});
+        this.tl = new gsap.TimelineLite({ paused: true, onComplete: this.cooldown, onCompleteScope:this });
         this.loadImages();
     }
 
     public windowResize = function() {
         //fix textpos
         console.log("resizeWindow");
+        setTimeout(function(){
+            this.resetButton.x = window.innerWidth - 200;
+            this.pauseButton.x = window.innerWidth - 250;
+            this.playButton.x = window.innerWidth - 300;
+          }.bind(this),1000);
 
-        this.resetButton.x = window.innerWidth - 200;
-        this.pauseButton.x = window.innerWidth - 250;
-        this.playButton.x = window.innerWidth - 300;
-
-        if (this.squaresContainer) {
+        if(this.squaresContainer){
             this.squaresContainer.x = (window.innerWidth - this.squaresContainer.width) / 2;
             this.squaresContainer.y = (window.innerHeight - this.squaresContainer.height) / 2;
         }
@@ -80,11 +81,9 @@ export class Gui {
                 this.isPlaying = true;
                 this.createPlayer();
             }
-        } else {
-            if (this.isPlaying) {
+        } else if (this.isPlaying) {
                 this.tl.pause();
                 this.isPlaying = false;
-            }
         }
     }
     private loadImages = function(): void {
@@ -178,7 +177,8 @@ export class Gui {
             console.log("reset button pressed");
 
             this.score = { off: 0, loop: 0 };
-            this.updateScore();
+            this.stepsAverage = 0;
+            this.updateScore({reset:true});
 
             this.isPlaying = false;
             this.playToggle(false);
@@ -268,15 +268,15 @@ export class Gui {
         var visitedFilter = new PIXI.filters.BlurFilter();
         this.squareArr[gridIndex].filters = [visitedFilter];
         visitedFilter.blur = 0;
-        if(this.tl.length < 1){
-          ndelay = 2;
-        }
+        // if (this.tl.length < 1) {
+        //     ndelay = 2;
+        // }
         //set up transition
         if (queue) {
             // console.log("queueing:" + gridIndex);
             this.tl.add(gsap.TweenLite.to(this.player.position, nduration, { x: pos.x, y: pos.y, delay: ndelay }));
             this.tl.add(gsap.TweenLite.to(this.player, nduration, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true }, delay: ndelay }));
-            this.tl.add(gsap.TweenLite.to(visitedFilter, nduration, { blur: 10, ease: gsap.quadIn, delay: ndelay }));
+            this.tl.add(gsap.TweenLite.to(visitedFilter, 1, { blur: 10, ease: gsap.quadIn, delay: 0 }));
         } else {
             // console.log("immediate");
             // console.log("this.player", this.player);
@@ -340,12 +340,12 @@ export class Gui {
         }
     }
     private runSolution = function(gridIndex: number) {
-        console.log("runSolution");
+        console.log("1runSolution");
         //flag ran so that we don't call animate without picking a new random
         this.ran = -1;
 
         //clear timeline
-        this.tl.clear();
+        // this.tl.clear();
 
         var newIndex = gridIndex;
         // console.log("====gridIndex", gridIndex);
@@ -360,25 +360,28 @@ export class Gui {
         var count = 0;
         do {
             this.steps++;
-            console.log("runTest");
+            console.log("2runTest");
             if (newIndex) {
-                if (this.grid[newIndex].visited) {
-                    console.log("test complete");
+                console.log("3runTest");
+                if (this.grid[newIndex].visited) { //loop detected
+                    console.log("4test complete - loop")
+                    this.movePlayer(newIndex, 0.3, 0, true);
                     this.updateScore({ team: "loop", steps: this.steps });
+                    runTest = false;
+                    this.tl.play();
                     //this.removePlayer();
                 } else {
-
-                    this.movePlayer(newIndex, 1, 0, true);
-                    this.tl.play();
-
+                    console.log("5 add item to timeline - movePlayer");
+                    this.movePlayer(newIndex, 0.3, 0, true);
+                    //update next
+                    console.log("5 add item to timeline - movePlayer");
+                    next = this.algorithm.getNext(this.grid[newIndex]);
+                    newIndex = this.findIndex(next.x, next.y);
                 }
-                //update next
-                next = this.algorithm.getNext(this.grid[newIndex]);
-                newIndex = this.findIndex(next.x, next.y);
-                runTest = false;
             } else {
-                console.log("detected out of bounds")
+                console.log("6detected out of bounds")
                 this.updateScore({ team: "off", steps: this.steps });
+                this.tl.play();
                 runTest = false;
             }
         } while (runTest)
@@ -553,23 +556,27 @@ export class Gui {
         setTimeout(this.drawGrid.bind(this), 6000);
     }
     private updateScore = function(data: any) {
-        console.log("==============updateScore");
+      console.log('updateScore');
 
         this.steps = 0;
+        if(data.reset === true){
+          this.typeMe(this.score_off, "offgrid: 0", 8, 200);
+          this.typeMe(this.score_looped, "looped: 0", 8, 200);
+          this.typeMe(this.steps_average, "average steps: 0", 15, 200);
+        }
         if (data.team == 'off') {
             this.score.off++;
-            this.typeMe(this.score_off, "offgrid: " + this.score.off.toString(), 0, 2000);
+            this.typeMe(this.score_off, "offgrid: " + this.score.off.toString(), 8, 200);
         }
         if (data.team == 'loop') {
             this.score.loop++;
-            this.typeMe(this.score_looped, "looped: " + this.score.loop.toString(), 0, 2000);
+            this.typeMe(this.score_looped, "looped: " + this.score.loop.toString(), 8, 200);
         }
         if (data.steps) {
             this.cycles++;
-            this.stepsAverage = (((this.stopsAverage * this.cycles) + data.steps) / (this.cycles + 1));
-            this.typeMe(this.average_steps, "average steps: " + this.score.loop.toString(), 0, 2000);
+            this.stepsAverage = (((this.stepsAverage * this.cycles) + data.steps) / (this.cycles + 1)).toFixed(2);
+            this.typeMe(this.steps_average, "average steps: " + this.stepsAverage.toString(), 15, 200);
         }
-        this.cooldown();
     }
     private typeMe = function(textObj: PIXI.Text, message: string, messageLength: number, delay: number): void {
         if (messageLength === undefined) {
