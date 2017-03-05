@@ -32,14 +32,26 @@ export class Gui {
     private tl: gsap.TimelineLite;
     private squareArr: PIXI.Graphics[];
 
+    private isPlaying:boolean = false;
+
     constructor(mainStage: PIXI.Container, mainColors: any, mainSounds: any) {
         this.stage = mainStage;
         this.colors = mainColors;
         this.sounds = mainSounds;
         this.algorithm = new Algorithm();
         this.playeroffsets = { x: this.algorithm.spacing / 2, y: this.algorithm.spacing / 2 };
-        this.tl = new gsap.TimelineLite({paused:true});
+        this.tl = new gsap.TimelineLite({ paused: true });
         this.loadImages();
+    }
+    private playToggle = function(){
+      this.isPlaying ? this.isPlaying = false : this.isPlaying = true;
+      if(this.isPlaying){
+        console.log("play!");
+        this.tl.play();
+      }else{
+        console.log("pause!");
+        this.tl.pause();
+      }
     }
     private loadImages = function(): void {
         //load images'
@@ -47,44 +59,54 @@ export class Gui {
             .add('player_blue', 'src/graphics/player_blue.png')
             .add('arrow_direction', 'src/graphics/arrow_direction.png')
             .add('mark_dot', 'src/graphics/mark_dot.png')
-            .add('arrowup_up', 'src/graphics/arrowup_up.png')
+            .add('arrowup_out', 'src/graphics/arrowup_out.png')
             .add('arrowup_over', 'src/graphics/arrowup_over.png')
-            .add('arrowup_hit', 'src/graphics/arrowup_hit.png')
-            .add('arrowdown_up', 'src/graphics/arrowdown_up.png')
+            .add('arrowup_down', 'src/graphics/arrowup_down.png')
+            .add('arrowdown_out', 'src/graphics/arrowdown_out.png')
             .add('arrowdown_over', 'src/graphics/arrowdown_over.png')
-            .add('arrowdown_hit', 'src/graphics/arrowdown_hit.png')
+            .add('arrowdown_down', 'src/graphics/arrowdown_down.png')
 
-            .add('stop_up', 'src/graphics/stop_up.png')
-            .add('stop_over', 'src/graphics/stop_over.png')
-            .add('stop_hit', 'src/graphics/stop_hit.png')
+            .add('pause_out', 'src/graphics/pause_out.png')
+            .add('pause_over', 'src/graphics/pause_over.png')
+            .add('pause_down', 'src/graphics/pause_down.png')
 
-            .add('arrow_up', 'src/graphics/arrow_up.png')
-            .add('arrow_over', 'src/graphics/arrow_over.png')
-            .add('arrow_hit', 'src/graphics/arrow_hit.png')
+            .add('play_out', 'src/graphics/play_out.png')
+            .add('play_over', 'src/graphics/play_over.png')
+            .add('play_down', 'src/graphics/play_down.png')
+
+            .add('reset_out', 'src/graphics/reset_out.png')
+            .add('reset_over', 'src/graphics/reset_over.png')
+            .add('reset_down', 'src/graphics/reset_down.png')
+
             .on('complete', function(loader, resources) {
                 this.sprites.player_blue = new PIXI.Sprite(resources.player_blue.texture);
                 this.sprites.arrow_direction = new PIXI.Sprite(resources.arrow_direction.texture);
                 this.sprites.mark_dot = new PIXI.Sprite(resources.mark_dot.texture);
-                this.sprites.colsup_up = new PIXI.Sprite(resources.arrowup_up.texture);
+                this.sprites.colsup_out = new PIXI.Sprite(resources.arrowup_out.texture);
                 this.sprites.colsup_over = new PIXI.Sprite(resources.arrowup_over.texture);
-                this.sprites.colsup_hit = new PIXI.Sprite(resources.arrowup_up.texture);
-                this.sprites.colsdown_up = new PIXI.Sprite(resources.arrowdown_up.texture);
+                this.sprites.colsup_down = new PIXI.Sprite(resources.arrowup_out.texture);
+                this.sprites.colsdown_out = new PIXI.Sprite(resources.arrowdown_out.texture);
                 this.sprites.colsdown_over = new PIXI.Sprite(resources.arrowdown_over.texture);
-                this.sprites.colsdown_hit = new PIXI.Sprite(resources.arrowdown_up.texture);
-                this.sprites.rowsup_up = new PIXI.Sprite(resources.arrowup_up.texture);
+                this.sprites.colsdown_down = new PIXI.Sprite(resources.arrowdown_out.texture);
+                this.sprites.rowsup_out = new PIXI.Sprite(resources.arrowup_out.texture);
                 this.sprites.rowsup_over = new PIXI.Sprite(resources.arrowup_over.texture);
-                this.sprites.rowsup_hit = new PIXI.Sprite(resources.arrowup_up.texture);
-                this.sprites.rowsdown_up = new PIXI.Sprite(resources.arrowdown_up.texture);
+                this.sprites.rowsup_down = new PIXI.Sprite(resources.arrowup_out.texture);
+                this.sprites.rowsdown_out = new PIXI.Sprite(resources.arrowdown_out.texture);
                 this.sprites.rowsdown_over = new PIXI.Sprite(resources.arrowdown_over.texture);
-                this.sprites.rowsdown_hit = new PIXI.Sprite(resources.arrowdown_up.texture);
+                this.sprites.rowsdown_down = new PIXI.Sprite(resources.arrowdown_out.texture);
 
-                this.sprites.stop_up = new PIXI.Sprite(resources.stop_up.texture);
-                this.sprites.stop_over = new PIXI.Sprite(resources.stop_over.texture);
-                this.sprites.stop_hit = new PIXI.Sprite(resources.stop_up.texture);
+                this.sprites.pause_out = new PIXI.Sprite(resources.pause_out.texture);
+                this.sprites.pause_over = new PIXI.Sprite(resources.pause_over.texture);
+                this.sprites.pause_down = new PIXI.Sprite(resources.pause_down.texture);
 
-                this.sprites.arrow_up = new PIXI.Sprite(resources.arrow_up.texture);
-                this.sprites.arrow_over = new PIXI.Sprite(resources.arrow_over.texture);
-                this.sprites.arrow_hit = new PIXI.Sprite(resources.arrow_up.texture);
+                this.sprites.play_out = new PIXI.Sprite(resources.play_out.texture);
+                this.sprites.play_over = new PIXI.Sprite(resources.play_over.texture);
+                this.sprites.play_down = new PIXI.Sprite(resources.play_down.texture);
+
+                this.sprites.reset_out = new PIXI.Sprite(resources.reset_out.texture);
+                this.sprites.reset_over = new PIXI.Sprite(resources.reset_over.texture);
+                this.sprites.reset_down = new PIXI.Sprite(resources.reset_down.texture);
+
                 this.onLoadCompleted();
             }.bind(this));
         this.loader.load();
@@ -115,15 +137,27 @@ export class Gui {
         this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 0);
     }
     private createButtons = function() {
-        var stopButton = new Btn(this.stage, this.loader.resources, "stop", "stop_up", window.innerWidth - 250, window.innerHeight - 30, function() {
-            //update board/matrix
-            //toggle playback
-        }.bind(this));
-        var resetButton = new Btn(this.stage, this.loader.resources, "arrow", "arrow_up", window.innerWidth - 200, window.innerHeight - 30, function() {
-            //update board/matrix
-            this.stage.destory(true);
+
+        var resetButton = new Btn(this.stage, this.loader.resources, "reset", "reset", window.innerWidth - 200, window.innerHeight - 30, function() {
+            //factory method would be good
+            //clear scores
+
+            this.isPlaying = true;
+            this.playToggle();
 
         }.bind(this));
+        var pauseButton = new Btn(this.stage, this.loader.resources, "pause", "pause", window.innerWidth - 250, window.innerHeight - 30, function() {
+            this.playToggle();
+
+        }.bind(this));
+        var playButton = new Btn(this.stage, this.loader.resources, "play", "play", window.innerWidth - 300, window.innerHeight - 30, function() {
+            //factory method?
+            this.isPlaying = false;
+            this.playToggle();
+
+        }.bind(this));
+
+
         var rowsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "rowsup", 405, window.innerHeight - 45, function() {
             //update board/matrix
             this.increaseGrid();
@@ -202,14 +236,14 @@ export class Gui {
         if (queue) {
             // console.log("queueing:" + gridIndex);
             this.tl.add(gsap.TweenLite.to(this.player.position, nduration, { x: pos.x, y: pos.y, delay: ndelay }));
-            this.tl.add(gsap.TweenLite.to(this.player, nduration, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true } , delay: ndelay }));
-            this.tl.add(gsap.TweenLite.to(visitedFilter, nduration, { blur:10, ease:gsap.quadIn , delay: ndelay }));
+            this.tl.add(gsap.TweenLite.to(this.player, nduration, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true }, delay: ndelay }));
+            this.tl.add(gsap.TweenLite.to(visitedFilter, nduration, { blur: 10, ease: gsap.quadIn, delay: ndelay }));
         } else {
             // console.log("immediate");
             // console.log("this.player", this.player);
             gsap.TweenLite.to(this.player.position, nduration, { x: pos.x, y: pos.y, delay: ndelay });
-            gsap.TweenLite.to(this.player, nduration, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true }, delay: ndelay },0);
-            gsap.TweenLite.to(visitedFilter, nduration, { blur:10, ease:gsap.quadIn , delay: ndelay });
+            gsap.TweenLite.to(this.player, nduration, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true }, delay: ndelay }, 0);
+            gsap.TweenLite.to(visitedFilter, nduration, { blur: 10, ease: gsap.quadIn, delay: ndelay });
         }
     }
     private removePlayer = function(): void {
@@ -266,7 +300,9 @@ export class Gui {
         this.typeMe(this.status, result.message, 0, 0);
 
         //run simulation
-        this.animateSolution(ran);
+        if(this.isPlaying){
+          this.animateSolution(ran);
+        }
     }
     private animateSolution = function(gridIndex: number) {
         var newIndex = gridIndex;
@@ -279,9 +315,9 @@ export class Gui {
         newIndex = this.findIndex(next.x, next.y);
         console.log("1newIndex", newIndex);
         var count = 0;
-       do{
-         console.log("runTest");
-            if(newIndex) {
+        do {
+            console.log("runTest");
+            if (newIndex) {
                 if (this.grid[newIndex].visited) {
                     runTest = false;
                     console.log("testComplete");
@@ -293,10 +329,10 @@ export class Gui {
                 //update next
                 next = this.algorithm.getNext(this.grid[newIndex]);
                 newIndex = this.findIndex(next.x, next.y);
-            }else{
-              runTest = false;
+            } else {
+                runTest = false;
             }
-       }while(runTest)
+        } while (runTest)
 
     }
     private findIndex = function(x: number, y: number) {
@@ -312,7 +348,7 @@ export class Gui {
     private drawGrid = function() {
         this.grid = this.algorithm.reset();
         if (this.squaresContainer) {
-            this.squaresContainer.destroy(true);
+            this.squaresContainer.destroy();
         }
         this.squaresContainer = new PIXI.Container();
         this.stage.addChild(this.squaresContainer);
@@ -337,13 +373,15 @@ export class Gui {
             }
             var squareContainer = new PIXI.Container();
             var square = new PIXI.Graphics();
-            square.beginFill(squarecolor, 0.5);
+            square.beginFill(squarecolor, 1);
             square.lineStyle(1, this.colors.lines, 1);
             var x = (i % this.algorithm.cols) * this.algorithm.spacing;
             var y = Math.floor(i / this.algorithm.rows) * this.algorithm.spacing;
             square.drawRect(x, y, this.algorithm.spacing, this.algorithm.spacing);
             square.drawRect(x, y, this.algorithm.spacing, this.algorithm.spacing);
             squareContainer.addChild(square);
+            squareContainer.alpha = 0;
+            gsap.TweenLite.to(squareContainer, (Math.random()*0.5),{alpha:0.8, delay: (Math.random()*1)});
             this.squareArr.push(squareContainer);
             this.squaresContainer.addChild(this.squareArr[i]);
         }
