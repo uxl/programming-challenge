@@ -6,6 +6,8 @@ import gsap = require('gsap');
 // import TweenLite = require('gsap/src/uncompressed/TweenLite.js');
 
 export class Gui {
+    private isPredictive: boolean = true;
+
     private stage: PIXI.Container;
     private algorithm: Algorithm;
     private colors: any;
@@ -34,7 +36,6 @@ export class Gui {
     private ran: number = -1;
     private steps: number = 0;
 
-    private isPlaying: boolean = false;
     private score: any = { off: 0, loop: 0 };
     private cycles: number = 0;
     private stepsAverage: number = 0;
@@ -46,46 +47,78 @@ export class Gui {
     private pauseButton: Btn;
     private resetButton: Btn;
 
+    private isPlaying: boolean = false;
+    private isPaused: boolean = false;
+
+    //grab objects from main context
+    //create timeline
+    //player offset based on size of squares
+
     constructor(mainStage: PIXI.Container, mainColors: any, mainSounds: any) {
         this.stage = mainStage;
         this.colors = mainColors;
         this.sounds = mainSounds;
         this.algorithm = new Algorithm();
         this.playeroffsets = { x: this.algorithm.spacing / 2, y: this.algorithm.spacing / 2 };
-        this.tl = new gsap.TimelineLite({ paused: true, onComplete: this.cooldown, onCompleteScope:this });
+        this.tl = new gsap.TimelineLite({ paused: true, onComplete: this.drawGrid, onCompleteScope: this });
         this.loadImages();
     }
 
+    //resize event to handle console window opening
     public windowResize = function() {
         //fix textpos
         console.log("resizeWindow");
-        setTimeout(function(){
-            this.resetButton.x = window.innerWidth - 200;
-            this.pauseButton.x = window.innerWidth - 250;
-            this.playButton.x = window.innerWidth - 300;
-          }.bind(this),1000);
+        if (this.squarescontainer) {
+            this.squarescontainer.x = (window.innerWidth - this.squarescontainer.width) / 2;
+            this.squarescontainer.y = (window.innerHeight - this.squarescontainer.height) / 2;
+            this.drawArrows();
+        }
+    }
 
-        if(this.squaresContainer){
-            this.squaresContainer.x = (window.innerWidth - this.squaresContainer.width) / 2;
-            this.squaresContainer.y = (window.innerHeight - this.squaresContainer.height) / 2;
-        }
-    }
-    private cooldown = function() {
-        setTimeout(function() {
-            this.drawGrid();
-        }.bind(this), 3000);
-    }
-    private playToggle = function(request: boolean) {
-        if (request) {
-            if (!this.isPlaying) {
-                this.isPlaying = true;
-                this.createPlayer();
-            }
-        } else if (this.isPlaying) {
-                this.tl.pause();
+    // manage play, pause and restart states
+    private playToggle = function(stat: string) {
+        // console.log("playToggle: " + stat + " isPlaying: " + this.isPlaying + " | isPaused: " + this.isPaused);
+        switch (stat) {
+            case 'play':
+                // is play false is paused false - first run or reset
+                if (!this.isPlaying && !this.isPaused) {
+                    this.isPlaying = true;
+                    this.createPlayer();
+                    // this.playButton.alpha = 0.5;
+                } else {
+                    if (this.isPlaying && !this.isPaused) {
+                    } else {
+                        //if paused unpause
+                        this.playToggle('pause');
+                    }
+                }
+                break;
+            case 'reset':
+                this.isPaused = false;
                 this.isPlaying = false;
+                //scores
+                this.score = { off: 0, loop: 0 };
+                this.stepsAverage = 0;
+                this.steps = 0;
+                this.updateScore({ reset: true });
+                this.tl.clear();
+                this.drawGrid();
+                this.removePlayer();
+                break;
+            case 'pause':
+                if (!this.isPaused && this.isPlaying) {
+                    this.tl.pause();
+                    this.isPlaying = false;
+                    this.isPaused = true;
+                } else {
+                    this.tl.play();
+                    this.isPlaying = true;
+                    this.isPaused = false;
+                }
+                break;
         }
     }
+    //load images and create sprites for buttons, player
     private loadImages = function(): void {
         //load images'
         this.loader = PIXI.loader
@@ -144,10 +177,8 @@ export class Gui {
             }.bind(this));
         this.loader.load();
     }
-    private coordinates = function() {
 
-    }
-
+    //build ui after load completion
     private onLoadCompleted = function() {
         //containers
         this.arrowcontainer = new PIXI.Container();
@@ -157,85 +188,70 @@ export class Gui {
         this.createText();
         this.createButtons();
     }
+
+    // add rows/cols button handler
     private increaseGrid() {
         this.algorithm.rows++;
         this.algorithm.cols++;
         this.typeMe(this.rowsValue, this.algorithm.rows.toString(), 0, 0);
         this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 0);
     }
+
+    // remove rows/cols button handler
     private reduceGrid() {
         this.algorithm.rows--;
         this.algorithm.cols--;
         this.typeMe(this.rowsValue, this.algorithm.rows.toString(), 0, 0);
         this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 0);
     }
+
+    //instantiate buttons
     private createButtons = function() {
-
-        this.resetButton = new Btn(this.stage, this.loader.resources, "reset", "reset", window.innerWidth - 200, window.innerHeight - 30, function() {
-            //factory method would be good
-            //clear scores
-            console.log("reset button pressed");
-
-            this.score = { off: 0, loop: 0 };
-            this.stepsAverage = 0;
-            this.updateScore({reset:true});
-
-            this.isPlaying = false;
-            this.playToggle(false);
+        this.resetButton = new Btn(this.stage, this.loader.resources, "reset", "reset", 1000, window.innerHeight - 35, function() {
+            this.playToggle('reset');
 
         }.bind(this));
-        this.pauseButton = new Btn(this.stage, this.loader.resources, "pause", "pause", window.innerWidth - 250, window.innerHeight - 30, function() {
-            this.playToggle(false);
-            console.log("pause button pressed");
+        this.pauseButton = new Btn(this.stage, this.loader.resources, "pause", "pause", 950, window.innerHeight - 35, function() {
+            this.playToggle('pause');
         }.bind(this));
-
-        this.playButton = new Btn(this.stage, this.loader.resources, "play", "play", window.innerWidth - 300, window.innerHeight - 30, function() {
-            //factory method?
-            this.playToggle(true);
-            console.log("play button pressed");
-
+        this.playButton = new Btn(this.stage, this.loader.resources, "play", "play", 900, window.innerHeight - 35, function() {
+            this.playToggle('play');
         }.bind(this));
         this.rowsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "rowsup", 405, window.innerHeight - 45, function() {
-            //update board/matrix
             this.increaseGrid();
-            this.drawGrid();
-
+            this.playToggle('reset');
         }.bind(this));
         this.rowsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", "rowdown", 400, window.innerHeight - 30, function() {
             //update board/matrix
             this.reduceGrid();
-            this.drawGrid();
-
+            this.playToggle('reset');
         }.bind(this));
-
         this.colsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "colsup", 605, window.innerHeight - 45, function() {
             //update board/matrix
             this.increaseGrid();
-            this.drawGrid();
-
+            this.playToggle('reset');
         }.bind(this));
         this.colsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", "colsdown", 600, window.innerHeight - 30, function() {
             //update board/matrix
             this.reduceGrid();
-            this.drawGrid();
+            this.playToggle('reset');
         }.bind(this));
-
     }
+
+    //get position {x:n, y:n, angle:radians} based on index
     private getPosition = function(padx, pady, gridIndex: number) {
         var pos: any = {};
         //graphic offset
-        var padx = this.squaresContainer.x + padx;
-        var pady = this.squaresContainer.y + pady;
-
+        var padx = this.squarescontainer.x + padx;
+        var pady = this.squarescontainer.y + pady;
         //calculate position
         pos.x = this.grid[gridIndex].x * this.algorithm.spacing + padx;
         pos.y = this.grid[gridIndex].y * this.algorithm.spacing + pady;
         pos.angle = ((this.grid[gridIndex].direction * 90) * Math.PI / 180);
-        // console.log(this.degrees(pos.angle));
         return pos;
     }
     //make arrows
-    private createArrows = function(): void {
+    private drawArrows = function(): void {
         if (this.arrows.length > 0) {
             for (var i = 0; i < this.arrows.length; i++) {
                 this.arrows[i].destroy();
@@ -252,10 +268,8 @@ export class Gui {
             gsap.TweenLite.to(this.arrows[i].position, 0, { x: pos.x, y: pos.y });
             gsap.TweenLite.to(this.arrows[i], 0, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true } });
         }
-        // this.arrowcontainer.x = (this.squaresContainer.width);
-        // this.arrowcontainer.y = (this.squaresContainer.height);
-        this.arrowcontainer.x = (this.squaresContainer.width);
-        this.arrowcontainer.y = (this.squaresContainer.height);
+        this.arrowcontainer.x = (this.squarescontainer.width);
+        this.arrowcontainer.y = (this.squarescontainer.height);
     }
     //takes index, duration, delay and if you want to queue multiple events onto timeline
     private movePlayer = function(gridIndex: number, nduration: number, ndelay: number, queue: boolean): void {
@@ -268,59 +282,43 @@ export class Gui {
         var visitedFilter = new PIXI.filters.BlurFilter();
         this.squareArr[gridIndex].filters = [visitedFilter];
         visitedFilter.blur = 0;
-        // if (this.tl.length < 1) {
-        //     ndelay = 2;
-        // }
-        //set up transition
         if (queue) {
-            // console.log("queueing:" + gridIndex);
             this.tl.add(gsap.TweenLite.to(this.player.position, nduration, { x: pos.x, y: pos.y, delay: ndelay }));
             this.tl.add(gsap.TweenLite.to(this.player, nduration, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true }, delay: ndelay }));
             this.tl.add(gsap.TweenLite.to(visitedFilter, 0.3, { blur: 10, ease: gsap.quadIn, delay: 0 }));
         } else {
-            // console.log("immediate");
-            // console.log("this.player", this.player);
             gsap.TweenLite.to(this.player.position, nduration, { x: pos.x, y: pos.y, delay: ndelay });
             gsap.TweenLite.to(this.player, nduration, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true }, delay: ndelay }, 0);
             gsap.TweenLite.to(visitedFilter, nduration, { blur: 10, ease: gsap.quadIn, delay: ndelay });
         }
     }
+    //remove player - play yelp
     private removePlayer = function(): void {
-        console.log("removePlayer");
-        //gsap.TweenLite.to(this.player, 10,{scale: 2, alpha: 0.5});
+        this.stage.removeChild(this.player);
         this.sounds.play("yelp");
     }
+    //utility to convert radians
     private radians = function(degrees: number) {
         var radians = degrees * (Math.PI / 180)
         return radians % (Math.PI / 180);
     }
+    //utility to convert degrees
     private degrees = function(radians: number) {
         var degrees = radians * (180 / Math.PI);
         return degrees;
     }
-    //not working
-    private deltaAngle = function(source, target) {
-        var target = this.degrees(target);
-        var source = this.degrees(source);
 
-        var d = target - source;
-        var result = (d + 180) % 360 - 180;
-        result = this.radians(result);
-        return result;
-    }
-    //returns radians now
+    //create player, position
     private createPlayer = function(): void {
-
         //get random position
         this.ran = this.algorithm.randomStart();
 
         //graphic offset
-        var padx = this.squaresContainer.x + this.playeroffsets.x;
-        var pady = this.squaresContainer.y + this.playeroffsets.y;
+        var padx = this.squarescontainer.x + this.playeroffsets.x;
+        var pady = this.squarescontainer.y + this.playeroffsets.y;
         //calculate position
         var posx = this.grid[this.ran].x * this.algorithm.spacing + padx;
         var posy = this.grid[this.ran].y * this.algorithm.spacing + pady;
-        // console.log(this.grid[ran]);
 
         //player
         this.player = this.sprites.player_blue;
@@ -331,62 +329,54 @@ export class Gui {
         this.sounds.play("start");
 
         //check outcome
-        var result = this.algorithm.checkLoop(this.grid, this.ran);
-        this.typeMe(this.status, result.message, 0, 0);
-
+        if (this.isPredictive) {
+            var result = this.algorithm.checkLoop(this.grid, this.ran);
+            this.typeMe(this.status, result.message, 0, 0);
+        }
         //run simulation
         if (this.isPlaying) {
             this.runSolution(this.ran);
         }
     }
+
+    //animates and solves using visited flag in grid object
     private runSolution = function(gridIndex: number) {
-        console.log("1runSolution");
         //flag ran so that we don't call animate without picking a new random
         this.ran = -1;
 
-        //clear timeline
-        // this.tl.clear();
-
         var newIndex = gridIndex;
-        // console.log("====gridIndex", gridIndex);
         var next: any;
         var runTest = true;
-        //check set visited
-        //while(!testComplete){
+
         var next = this.algorithm.getNext(this.grid[newIndex]);
         newIndex = this.findIndex(next.x, next.y);
-        // console.log("1newIndex", newIndex);
 
         var count = 0;
         do {
             this.steps++;
-            console.log("2runTest");
             if (newIndex) {
-                console.log("3runTest");
-                if (this.grid[newIndex].visited) { //loop detected
-                    console.log("4test complete - loop")
-                    // this.movePlayer(newIndex, 0.3, 0, true);
+                console.log("loop detected during animation");
+                //loop detected
+                if (this.grid[newIndex].visited) {
                     this.updateScore({ team: "loop", steps: this.steps });
                     runTest = false;
+                    this.tl.add(gsap.TweenLite.to(this, 2, {}));
                     this.tl.play();
-                    //this.removePlayer();
                 } else {
-                    console.log("5 add item to timeline - movePlayer");
                     this.movePlayer(newIndex, 0.3, 0, true);
-                    //update next
-                    console.log("5 add item to timeline - movePlayer");
                     next = this.algorithm.getNext(this.grid[newIndex]);
                     newIndex = this.findIndex(next.x, next.y);
                 }
             } else {
-                console.log("6detected out of bounds")
+                console.log("out of bounds detected during animation");
                 this.updateScore({ team: "off", steps: this.steps });
+                this.tl.add(gsap.TweenLite.to(this, 2, {}));
                 this.tl.play();
                 runTest = false;
             }
         } while (runTest)
-
     }
+    //takes row and column number and returns index
     private findIndex = function(x: number, y: number) {
         for (var i = 0; i < this.grid.length; i++) {
             if (this.grid[i].x == x && this.grid[i].y == y) {
@@ -394,24 +384,28 @@ export class Gui {
             }
         }
     }
+
     private isEven = function(n) {
         return n % 2 == 0;
     }
+
+    //redraws squares
     private drawGrid = function() {
         if (this.squareArr.length > 0) {
             for (var i = 0; i < this.squareArr.length; i++) {
-                this.squareArr[i].destroy(true, true, true);
+                this.squareArr[i].destroy();
             }
             this.squareArr = [];
         }
         this.grid = this.algorithm.reset();
-        if (this.squaresContainer) {
-            this.squaresContainer.destroy(true, true, true);
+        if (this.squarescontainer) {
+            this.squarescontainer.destroy();
         }
-        this.squaresContainer = new PIXI.Container();
-        this.stage.addChild(this.squaresContainer);
+        this.squarescontainer = new PIXI.Container();
+        this.stage.addChild(this.squarescontainer);
 
         //using graphics for squares
+        //animates squares on
         var squarecolor: number;
         this.squareArr = [];
         for (var i = 0; i < this.grid.length; i++) {
@@ -440,16 +434,14 @@ export class Gui {
             squareContainer.addChild(square);
             squareContainer.alpha = 0;
             this.squareArr.push(squareContainer);
-            this.squaresContainer.addChild(this.squareArr[i]);
-            gsap.TweenLite.to(this.squareArr[i], 0.1, { alpha: 1, delay: Math.random()*0.4 });
+            this.squarescontainer.addChild(this.squareArr[i]);
+            gsap.TweenLite.to(this.squareArr[i], 0.1, { alpha: 1, delay: Math.random() * 0.4 });
         }
 
-        // this.squaresContainer.addChild(squares);
-
         // Center on the screen
-        this.squaresContainer.x = (window.innerWidth - this.squaresContainer.width) / 2;
-        this.squaresContainer.y = (window.innerHeight - this.squaresContainer.height) / 2;
-        this.createArrows();
+        this.squarescontainer.x = (window.innerWidth - this.squarescontainer.width) / 2;
+        this.squarescontainer.y = (window.innerHeight - this.squarescontainer.height) / 2;
+        this.drawArrows();
         setTimeout(function() {
             if (this.isPlaying) {
                 this.createPlayer();
@@ -457,6 +449,7 @@ export class Gui {
         }.bind(this), 2000);
     }
 
+    //gui element drawn
     private createLine = function(): void {
         this.line = new PIXI.Graphics();
 
@@ -470,6 +463,8 @@ export class Gui {
 
         this.stage.addChild(this.line);
     }
+
+    //gui text elements created
     private createText = function(): void {
         //text test
         let style = new PIXI.TextStyle({
@@ -553,16 +548,18 @@ export class Gui {
         this.stage.addChild(this.colsValue);
         this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 5000);
         this.typeMe(this.status, "Ready", 0, 6000);
+
         setTimeout(this.drawGrid.bind(this), 6000);
     }
-    private updateScore = function(data: any) {
-      console.log('updateScore');
 
+    //updates the tally on outcomses
+    //average forumula doesn't store array of sums to get average. Fixed(2) for display purposes
+    private updateScore = function(data: any) {
         this.steps = 0;
-        if(data.reset === true){
-          this.typeMe(this.score_off, "offgrid: 0", 8, 200);
-          this.typeMe(this.score_looped, "looped: 0", 8, 200);
-          this.typeMe(this.steps_average, "average steps: 0", 15, 200);
+        if (data.reset === true) {
+            this.typeMe(this.score_off, "offgrid: 0", 8, 200);
+            this.typeMe(this.score_looped, "looped: 0", 8, 200);
+            this.typeMe(this.steps_average, "average steps: 0", 15, 200);
         }
         if (data.team == 'off') {
             this.score.off++;
@@ -574,10 +571,12 @@ export class Gui {
         }
         if (data.steps) {
             this.cycles++;
-            this.stepsAverage = (((this.stepsAverage * this.cycles) + data.steps) / (this.cycles + 1)).toFixed(2);
-            this.typeMe(this.steps_average, "average steps: " + this.stepsAverage.toString(), 15, 200);
+            this.stepsAverage = (((this.stepsAverage * this.cycles) + data.steps) / (this.cycles + 1));
+            this.typeMe(this.steps_average, "average steps: " + this.stepsAverage.toFixed(2).toString(), 15, 200);
         }
     }
+
+    //typing animation
     private typeMe = function(textObj: PIXI.Text, message: string, messageLength: number, delay: number): void {
         if (messageLength === undefined) {
             textObj.text = "";
@@ -597,6 +596,5 @@ export class Gui {
         if (messageLength < message.length + 1) {
             setTimeout(this.typeMe.bind(this, textObj, message, messageLength, 50), delay);
         }
-
     }
 }
