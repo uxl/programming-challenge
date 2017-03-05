@@ -16,10 +16,10 @@ export class Btn {
         // console.log(name);
         // var textureButton = PIXI.Texture.fromImage('required/assets/button.png');
 
-        this.buttonObject[name + "up"] = resources[btnkind + '_up'].texture;
+        this.buttonObject[name + "up"] = resources[btnkind + '_out'].texture;
         this.buttonObject[name + "over"] = resources[btnkind + "_over"].texture;
-        this.buttonObject[name + "hit"] = resources[btnkind + "_hit"].texture;
-        this.buttonObject[name + "base"] = new PIXI.Sprite(resources[btnkind + "_up"].texture);
+        this.buttonObject[name + "down"] = resources[btnkind + "_down"].texture;
+        this.buttonObject[name + "base"] = new PIXI.Sprite(resources[btnkind + "_out"].texture);
         this.buttonObject[name + "base"].anchor.set(0.5);
         this.buttonObject[name + "base"].x = xpos;
         this.buttonObject[name + "base"].y = ypos;
@@ -55,7 +55,7 @@ export class Btn {
     private onButtonDown = function(me,callback): void {
         // console.log("onButtonDown");
         this.isdown = true;
-        this.texture = this.buttonObject[me + "_hit"];
+        this.texture = this.buttonObject[me + "_down"];
         this.alpha = 1;
         callback();
     }
@@ -66,7 +66,7 @@ export class Btn {
             this.texture = this.buttonObject[me + "_over"];
         }
         else {
-            this.texture = this.buttonObject[me + "_up"];
+            this.texture = this.buttonObject[me + "_out"];
         }
     }
     private onButtonOver = function(me): void {
@@ -83,6 +83,6 @@ export class Btn {
         if (this.isdown) {
             return;
         }
-        this.texture = this.buttonObject[me + "_up"];
+        this.texture = this.buttonObject[me + "_out"];
     }
 }
