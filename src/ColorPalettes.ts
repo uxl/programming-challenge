@@ -1,5 +1,6 @@
 import {IPalette} from './interfaces/IPalette';
 
+//load palletes
 export class ColorPalettes {
     private paletteIndex: 0;
     public palettes: null;

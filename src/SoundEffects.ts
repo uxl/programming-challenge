@@ -9,9 +9,9 @@ export class SoundEffects {
             sprite: {
                 keypress: [10, 54],
                 start: [249, 1650],
-                klaxon: [1980, 2620],
-                move: [2622, 3000],
-                yelp: [2622, 3000]
+                klaxon: [2000, 2100],
+                move: [0, 1],
+                yelp: [0, 1]
             }
         });
     }
