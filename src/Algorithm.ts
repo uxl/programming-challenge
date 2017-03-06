@@ -15,7 +15,7 @@ export class Algorithm {
         return this._rows;
     }
     set rows(newval: number) {
-        this._rows = newval;
+        this._cols = newval;
         this._rows = newval;
     }
     get cols(): number {

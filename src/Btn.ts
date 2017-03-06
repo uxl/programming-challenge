@@ -11,6 +11,7 @@ export class Btn {
     private downTexture:PIXI.Texture;
 
     private textureButton:PIXI.Sprite;
+    private _isActive:boolean = false;
 
     constructor(mainStage:any, resources:any, name:string, xpos: number, ypos: number, callbk:Function) {
         // create some textures from an image path
@@ -38,9 +39,15 @@ export class Btn {
             .on('pointerupoutside', this.onButtonUp.bind(this))
             .on('pointerover', this.onButtonOver.bind(this))
             .on('pointerout', this.onButtonOut.bind(this));
-
         // add it to the stage
         this.stage.addChild(this.textureButton);
+    }
+    //get and set for rows and columns
+    get active(): boolean {
+        return this._isActive;
+    }
+    set active(newval: boolean) {
+        this._isActive = newval;
     }
     private onButtonOver = function(): void {
       // console.log("onButtonOver");
@@ -72,7 +79,7 @@ export class Btn {
     private onButtonOut = function(this, name): void {
         // console.log("onButtonOut");
         this.isOver = false;
-        if (this.isdown) {
+        if (this.isdown || this._isActive) {
             return;
         }
         this.textureButton.texture = this.outTexture;
