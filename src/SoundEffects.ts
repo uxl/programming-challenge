@@ -35,7 +35,6 @@ export class SoundEffects {
         this.soundObj['start'] = start;
         this.soundObj['result'] = result;
         this.soundObj['yelp'] = yelp;
-        console.log(this.soundObj);
     }
     public play = function(snd: string): void {
         //console.log("snd", snd);
