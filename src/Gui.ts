@@ -222,7 +222,6 @@ export class Gui {
             this.playToggle('pause');
         }.bind(this));
         this.playButton = new Btn(this.stage, this.loader.resources, "play", 900, window.innerHeight - 35, function() {
-          console.log("play button pressed")
             this.playToggle('play');
         }.bind(this));
         this.rowsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", 405, window.innerHeight - 45, function() {
