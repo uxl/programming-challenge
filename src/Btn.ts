@@ -2,24 +2,19 @@ import * as PIXI from "pixi.js";
 
 export class Btn {
     private buttonObject: Object = {};
-    private btnkind: String;
+    private name: String;
     private callback:Function;
     private stage:PIXI.Container;
 
-    constructor(mainStage:any, resources:any, btnkind: string, name:string, xpos: number, ypos: number, callbk:Function) {
+    constructor(mainStage:any, resources:any, name:string, xpos: number, ypos: number, callbk:Function) {
         // create some textures from an image path
         this.stage = mainStage;
-        this.btnkind = btnkind;
         this.callback = callbk;
 
-        // console.log("btnkind: " + this.btnkind);
-        // console.log(name);
-        // var textureButton = PIXI.Texture.fromImage('required/assets/button.png');
-
-        this.buttonObject[name + "up"] = resources[btnkind + '_out'].texture;
-        this.buttonObject[name + "over"] = resources[btnkind + "_over"].texture;
-        this.buttonObject[name + "down"] = resources[btnkind + "_down"].texture;
-        this.buttonObject[name + "base"] = new PIXI.Sprite(resources[btnkind + "_out"].texture);
+        this.buttonObject[name + "up"] = resources[name + '_out'].texture;
+        this.buttonObject[name + "over"] = resources[name + "_over"].texture;
+        this.buttonObject[name + "down"] = resources[name + "_down"].texture;
+        this.buttonObject[name + "base"] = new PIXI.Sprite(resources[name + "_out"].texture);
         this.buttonObject[name + "base"].anchor.set(0.5);
         this.buttonObject[name + "base"].x = xpos;
         this.buttonObject[name + "base"].y = ypos;
@@ -31,23 +26,11 @@ export class Btn {
         // Mouse & touch events are normalized into
         // the pointer* events for handling different
         this.buttonObject[name + "base"]
-            .on('pointerdown', this.onButtonDown.bind(this, "textureButton", this.callback))
-            .on('pointerup', this.onButtonUp.bind(this, "textureButton"))
-            .on('pointerupoutside', this.onButtonUp.bind(this, "textureButton"))
-            .on('pointerover', this.onButtonOver.bind(this, "textureButton"))
-            .on('pointerout', this.onButtonOut.bind(this, "textureButton"));
-
-        // Use mouse-only events
-        // .on('mousedown', onButtonDown)
-        // .on('mouseup', onButtonUp)
-        // .on('mouseupoutside', onButtonUp)
-        // .on('mouseover', onButtonOver)
-        // .on('mouseout', onButtonOut)
-
-        // Use touch-only events
-        // .on('touchstart', onButtonDown)
-        // .on('touchend', onButtonUp)
-        // .on('touchendoutside', onButtonUp)
+            .on('pointerdown', this.onButtonDown.bind(this, name, this.callback))
+            .on('pointerup', this.onButtonUp.bind(this, name))
+            .on('pointerupoutside', this.onButtonUp.bind(this, name))
+            .on('pointerover', this.onButtonOver.bind(this, name))
+            .on('pointerout', this.onButtonOut.bind(this, name));
 
         // add it to the stage
         this.stage.addChild(this.buttonObject[name + "base"]);

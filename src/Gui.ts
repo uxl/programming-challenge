@@ -81,13 +81,17 @@ export class Gui {
         // console.log("playToggle: " + stat + " isPlaying: " + this.isPlaying + " | isPaused: " + this.isPaused);
         switch (stat) {
             case 'play':
+
                 // is play false is paused false - first run or reset
                 if (!this.isPlaying && !this.isPaused) {
+                    this.sounds.play("beep");
                     this.isPlaying = true;
                     this.createPlayer();
+
                     // this.playButton.alpha = 0.5;
                 } else {
                     if (this.isPlaying && !this.isPaused) {
+                      //do nothing
                     } else {
                         //if paused unpause
                         this.playToggle('pause');
@@ -95,6 +99,8 @@ export class Gui {
                 }
                 break;
             case 'reset':
+                this.sounds.play("beep");
+
                 this.isPaused = false;
                 this.isPlaying = false;
                 //scores
@@ -108,6 +114,7 @@ export class Gui {
                 break;
             case 'pause':
                 if (!this.isPaused && this.isPlaying) {
+                    this.sounds.play("beep");
                     this.tl.pause();
                     this.isPlaying = false;
                     this.isPaused = true;
@@ -208,31 +215,32 @@ export class Gui {
 
     //instantiate buttons
     private createButtons = function() {
-        this.resetButton = new Btn(this.stage, this.loader.resources, "reset", "reset", 1000, window.innerHeight - 35, function() {
+        this.resetButton = new Btn(this.stage, this.loader.resources, "reset", 1000, window.innerHeight - 35, function() {
+            this.playToggle('reset');
+        }.bind(this));
+        this.pauseButton = new Btn(this.stage, this.loader.resources, "pause", 950, window.innerHeight - 35, function() {
+            this.playToggle('pause');
+        }.bind(this));
+        this.playButton = new Btn(this.stage, this.loader.resources, "play", 900, window.innerHeight - 35, function() {
+          console.log("play button pressed")
+            this.playToggle('play');
+        }.bind(this));
+        this.rowsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", 405, window.innerHeight - 45, function() {
+            this.increaseGrid();
             this.playToggle('reset');
 
         }.bind(this));
-        this.pauseButton = new Btn(this.stage, this.loader.resources, "pause", "pause", 950, window.innerHeight - 35, function() {
-            this.playToggle('pause');
-        }.bind(this));
-        this.playButton = new Btn(this.stage, this.loader.resources, "play", "play", 900, window.innerHeight - 35, function() {
-            this.playToggle('play');
-        }.bind(this));
-        this.rowsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "rowsup", 405, window.innerHeight - 45, function() {
-            this.increaseGrid();
-            this.playToggle('reset');
-        }.bind(this));
-        this.rowsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", "rowdown", 400, window.innerHeight - 30, function() {
+        this.rowsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", 400, window.innerHeight - 30, function() {
             //update board/matrix
             this.reduceGrid();
             this.playToggle('reset');
         }.bind(this));
-        this.colsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", "colsup", 605, window.innerHeight - 45, function() {
+        this.colsButtonUp = new Btn(this.stage, this.loader.resources, "arrowup", 605, window.innerHeight - 45, function() {
             //update board/matrix
             this.increaseGrid();
             this.playToggle('reset');
         }.bind(this));
-        this.colsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", "colsdown", 600, window.innerHeight - 30, function() {
+        this.colsButtonDown = new Btn(this.stage, this.loader.resources, "arrowdown", 600, window.innerHeight - 30, function() {
             //update board/matrix
             this.reduceGrid();
             this.playToggle('reset');
@@ -296,7 +304,6 @@ export class Gui {
     //remove player - play yelp
     private removePlayer = function(): void {
         this.stage.removeChild(this.player);
-        this.sounds.play("yelp");
     }
     //utility to convert radians
     private radians = function(degrees: number) {
@@ -373,7 +380,6 @@ export class Gui {
             } else {
                 this.bigOn.text = "O(n): off grid";
                 // this.typeMe(this.bigOn, "O(n): off grid", 0, 0);
-
                 console.log("out of bounds detected during animation");
                 this.updateScore({ team: "off", steps: this.steps });
                 this.tl.add(gsap.TweenLite.to(this, 2, {}));
@@ -397,6 +403,8 @@ export class Gui {
 
     //redraws squares
     private drawGrid = function() {
+        this.sounds.play("result");
+
         if (this.squareArr.length > 0) {
             for (var i = 0; i < this.squareArr.length; i++) {
                 this.squareArr[i].destroy();
@@ -465,7 +473,6 @@ export class Gui {
         // draw a shape
         this.line.moveTo(100, window.innerHeight - 70);
         this.line.lineTo(window.innerWidth - 100, window.innerHeight - 70);
-        this.sounds.play("move");
 
         this.stage.addChild(this.line);
     }
