@@ -87,6 +87,8 @@ export class Gui {
                     this.sounds.play("beep");
                     this.isPlaying = true;
                     this.createPlayer();
+                    this.playButton.active = true;
+                    this.pauseButton.active = false;
 
                     // this.playButton.alpha = 0.5;
                 } else {
@@ -100,7 +102,6 @@ export class Gui {
                 break;
             case 'reset':
                 this.sounds.play("beep");
-
                 this.isPaused = false;
                 this.isPlaying = false;
                 //scores
@@ -111,6 +112,8 @@ export class Gui {
                 this.tl.clear();
                 this.drawGrid();
                 this.removePlayer();
+                this.playButton.active = false;
+                this.pauseButton.active = false;
                 break;
             case 'pause':
                 if (!this.isPaused && this.isPlaying) {
@@ -118,10 +121,14 @@ export class Gui {
                     this.tl.pause();
                     this.isPlaying = false;
                     this.isPaused = true;
+                    this.playButton.active = false;
+                    this.pauseButton.active = true;
                 } else {
                     this.tl.play();
                     this.isPlaying = true;
                     this.isPaused = false;
+                    this.playButton.active = true;
+                    this.pauseButton.active = false;
                 }
                 break;
         }

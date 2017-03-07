@@ -3,17 +3,17 @@ import * as PIXI from "pixi.js";
 export class Btn {
     private buttonObject: Object = {};
     private name: String;
-    private callback:Function;
-    private stage:PIXI.Container;
+    private callback: Function;
+    private stage: PIXI.Container;
 
-    private outTexture:PIXI.Texture;
-    private overTexture:PIXI.Texture;
-    private downTexture:PIXI.Texture;
+    private outTexture: PIXI.Texture;
+    private overTexture: PIXI.Texture;
+    private downTexture: PIXI.Texture;
 
-    private textureButton:PIXI.Sprite;
-    private _isActive:boolean = false;
+    private textureButton: PIXI.Sprite;
+    private _isActive: boolean = false;
 
-    constructor(mainStage:any, resources:any, name:string, xpos: number, ypos: number, callbk:Function) {
+    constructor(mainStage: any, resources: any, name: string, xpos: number, ypos: number, callbk: Function) {
         // create some textures from an image path
         this.stage = mainStage;
         this.callback = callbk;
@@ -47,13 +47,18 @@ export class Btn {
         return this._isActive;
     }
     set active(newval: boolean) {
+        if(!newval){
+          this.textureButton.texture = this.outTexture;
+        }else{
+          this.textureButton.texture = this.downTexture;
+        }
         this._isActive = newval;
     }
     private onButtonOver = function(): void {
-      // console.log("onButtonOver");
-      // console.log(btn);
+        // console.log("onButtonOver");
+        // console.log(btn);
         this.isOver = true;
-        if (this.isdown) {
+        if (this.isdown || this._isActive) {
             return;
         }
         this.textureButton.texture = this.overTexture;
@@ -68,6 +73,9 @@ export class Btn {
     private onButtonUp = function(): void {
         // console.log("onButtonUp");
         this.isdown = false;
+        if (this._isActive) {
+            return;
+        }
         if (this.isOver) {
             this.textureButton.texture = this.overTexture;
         }
@@ -79,8 +87,8 @@ export class Btn {
     private onButtonOut = function(this, name): void {
         // console.log("onButtonOut");
         this.isOver = false;
-        if (this.isdown || this._isActive) {
-            return;
+        if(this.isdown || this._isActive) {
+          return;
         }
         this.textureButton.texture = this.outTexture;
     }
