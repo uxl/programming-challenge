@@ -66,12 +66,12 @@ let drawScene = function(){
     //init Gui pass in colors
     maingui = new Gui( stage, colors, SOUNDLIB);
     //start rendering engine
-    gameLoop();
-    console.log("started gameLoop");
+    renderLoop();
+    console.log("started renderLoop");
 };
-let gameLoop = function():void{
+let renderLoop = function():void{
   //loop 60 frames per second
-  requestAnimationFrame(gameLoop);
+  requestAnimationFrame(renderLoop);
 
   renderer.render(stage);
 }

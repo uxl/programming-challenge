@@ -1,9 +1,8 @@
 import * as PIXI from "pixi.js";
 import { Btn } from "./Btn";
 import { Algorithm } from "./Algorithm";
-
-import gsap = require('gsap');
-// import TweenLite = require('gsap/src/uncompressed/TweenLite.js');
+import { Gizmo } from "./Gizmo";
+import gsap = require("gsap");
 
 export class Gui {
     private isBigO1: boolean = true;
@@ -28,8 +27,8 @@ export class Gui {
     private marks: any = [];
     private player: PIXI.Sprite;
     private playeroffsets: any;
-    private squarecontainer: PIXI.Container;
-    private arrowcontainer: PIXI.Container;
+    private squaresContainer: PIXI.Container;
+    private arrowContainer: PIXI.Container;
     private grid: any = {};
     private arrows: any = [];
     private tl: gsap.TimelineLite;
@@ -51,6 +50,10 @@ export class Gui {
     private isPlaying: boolean = false;
     private isPaused: boolean = false;
 
+    //gizmo
+    private gizmoX: Gizmo;
+    private gizmoY: Gizmo;
+
     //grab objects from main context
     //create timeline
     //player offset based on size of squares
@@ -69,9 +72,9 @@ export class Gui {
     public windowResize = function() {
         //fix textpos
         console.log("resizeWindow");
-        if (this.squarescontainer) {
-            this.squarescontainer.x = (window.innerWidth - this.squarescontainer.width) / 2;
-            this.squarescontainer.y = (window.innerHeight - this.squarescontainer.height) / 2;
+        if (this.squaresContainer) {
+            this.squaresContainer.x = (window.innerWidth - this.squaresContainer.width) / 2;
+            this.squaresContainer.y = (window.innerHeight - this.squaresContainer.height) / 2;
             this.drawArrows();
         }
     }
@@ -93,7 +96,7 @@ export class Gui {
                     // this.playButton.alpha = 0.5;
                 } else {
                     if (this.isPlaying && !this.isPaused) {
-                      //do nothing
+                        //do nothing
                     } else {
                         //if paused unpause
                         this.playToggle('pause');
@@ -196,8 +199,8 @@ export class Gui {
     //build ui after load completion
     private onLoadCompleted = function() {
         //containers
-        this.arrowcontainer = new PIXI.Container();
-        this.stage.addChild(this.arrowcontainer);
+        this.arrowContainer = new PIXI.Container();
+        this.stage.addChild(this.arrowContainer);
 
         this.createLine();
         this.createText();
@@ -257,8 +260,8 @@ export class Gui {
     private getPosition = function(padx, pady, gridIndex: number) {
         var pos: any = {};
         //graphic offset
-        var padx = this.squarescontainer.x + padx;
-        var pady = this.squarescontainer.y + pady;
+        var padx = this.squaresContainer.x + padx;
+        var pady = this.squaresContainer.y + pady;
         //calculate position
         pos.x = this.grid[gridIndex].x * this.algorithm.spacing + padx;
         pos.y = this.grid[gridIndex].y * this.algorithm.spacing + pady;
@@ -283,8 +286,8 @@ export class Gui {
             gsap.TweenLite.to(this.arrows[i].position, 0, { x: pos.x, y: pos.y });
             gsap.TweenLite.to(this.arrows[i], 0, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true } });
         }
-        this.arrowcontainer.x = (this.squarescontainer.width);
-        this.arrowcontainer.y = (this.squarescontainer.height);
+        this.arrowContainer.x = (this.squaresContainer.width);
+        this.arrowContainer.y = (this.squaresContainer.height);
     }
     //takes index, duration, delay and if you want to queue multiple events onto timeline
     private movePlayer = function(gridIndex: number, nduration: number, ndelay: number, queue: boolean): void {
@@ -328,8 +331,8 @@ export class Gui {
         this.ran = this.algorithm.randomStart();
 
         //graphic offset
-        var padx = this.squarescontainer.x + this.playeroffsets.x;
-        var pady = this.squarescontainer.y + this.playeroffsets.y;
+        var padx = this.squaresContainer.x + this.playeroffsets.x;
+        var pady = this.squaresContainer.y + this.playeroffsets.y;
         //calculate position
         var posx = this.grid[this.ran].x * this.algorithm.spacing + padx;
         var posy = this.grid[this.ran].y * this.algorithm.spacing + pady;
@@ -418,11 +421,11 @@ export class Gui {
             this.squareArr = [];
         }
         this.grid = this.algorithm.reset();
-        if (this.squarescontainer) {
-            this.squarescontainer.destroy();
+        if (this.squaresContainer) {
+            this.squaresContainer.destroy();
         }
-        this.squarescontainer = new PIXI.Container();
-        this.stage.addChild(this.squarescontainer);
+        this.squaresContainer = new PIXI.Container();
+        this.stage.addChild(this.squaresContainer);
 
         //using graphics for squares
         //animates squares on
@@ -454,19 +457,23 @@ export class Gui {
             squareContainer.addChild(square);
             squareContainer.alpha = 0;
             this.squareArr.push(squareContainer);
-            this.squarescontainer.addChild(this.squareArr[i]);
+            this.squaresContainer.addChild(this.squareArr[i]);
             gsap.TweenLite.to(this.squareArr[i], 0.1, { alpha: 1, delay: Math.random() * 0.4 });
         }
 
         // Center on the screen
-        this.squarescontainer.x = (window.innerWidth - this.squarescontainer.width) / 2;
-        this.squarescontainer.y = (window.innerHeight - this.squarescontainer.height) / 2;
+        this.squaresContainer.x = (window.innerWidth - this.squaresContainer.width) / 2;
+        this.squaresContainer.y = (window.innerHeight - this.squaresContainer.height) / 2;
         this.drawArrows();
         setTimeout(function() {
             if (this.isPlaying) {
                 this.createPlayer();
             }
         }.bind(this), 2000);
+
+        //gizmo
+        this.gizmoX = new Gizmo(this));
+        this.gizmoY = new Gizmo(this));
     }
 
     //gui element drawn

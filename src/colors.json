@@ -2,15 +2,16 @@
     "colors": [
       {
         "background": "0x0c0c0c",
-        "headline": "0x67c4d5",
-        "font": "0x638284",
+        "headline": "0x81DBE2",
+        "font": "0x6AC5D1",
         "squaredark": "0x161a1d",
         "squarelight": "0x152022",
         "buttonsolid": "0x161a1b",
         "buttonoutline": "0xc3dae5",
         "buttonbackground": "0x55b4c2",
         "dot": "0xcbdee4",
-        "line": "0x425a54"
+        "line": "0x425a54",
+        "gizmo": "0xFFFFD3"
     }, {
         "background": "0x0B0B0B",
         "headline": "0x56B3BF",
