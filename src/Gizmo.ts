@@ -11,47 +11,46 @@ export class Gizmo {
     private gizmoContainer: PIXI.Container;
     private orientation: string;
     private target: PIXI.Sprite;
+    private context;
 
-    constructor(mainStage:any, mainColors:any, sprites:any, axis:string, target:PIXI.Sprite, pos: number) {
+    constructor(that) { //gizsprite, linecolor, fillcolor, axis, target
+      var self = that;
+      var colors = self.colors;
+      var player = self.player;
+      var mark_dot = self.sprites.mark_dot;
 
-      this.target = target;
+
         let data = new PIXI.TextStyle({
             fontFamily: 'Helvetica',
             fontSize: 12,
             fontStyle: 'normal',
             fontWeight: 'normal',
-            fill: mainColors.gizmo,
+            fill: colors.font,
             dropShadow: false,
             wordWrap: true,
             wordWrapWidth: 440
         });
 
-        this.gizmoSprite = sprites.mark_dot;
-        this.gizmoSprite.x = 0;
-        this.gizmoSprite.y = 0;
+        this.gizmoSprite = self.sprites.mark_dot;
+        this.gizmoSprite.x = -2;
+        this.gizmoSprite.y = 4;
 
         this.gizmoText = new PIXI.Text('00:00', data);
-        this.gizmoText.x = 0;
+        this.gizmoText.x = 10;
         this.gizmoText.y = 0;
 
         this.gizmoLine = new PIXI.Graphics();
-        this.gizmoLine.lineStyle(0.5, mainColors.line, 0.5);
+        this.gizmoLine.lineStyle(0.5, colors.line, 0.5);
         this.gizmoLine.moveTo(-25, 8);
         this.gizmoLine.lineTo(-5, 8);
 
+        //add gizmoContainer
         this.gizmoContainer = new PIXI.Container();
-        mainStage.addChild(this.gizmoContainer);
         this.gizmoContainer.addChild(this.gizmoSprite, this.gizmoText, this.gizmoLine);
+        self.stage.addChild(this.gizmoContainer);
+        this.gizmoContainer.x = 100;
+        this.gizmoContainer.y = 400;
 
-        this.orientation = axis;
-        //this.gizmoContainer.x = mainStage.getChildIndex('squaresContainer');
-
-        if(this.orientation == "x"){
-          this.gizmoContainer.x = pos + 40;
-          //this.gizmoContainer.rotation = 90 * (Math.PI / 180);
-        }else{
-          //this.gizmoContainer.rotation = 90 * (Math.PI / 180);
-        }
     }
     public updatePosition(){
       if(this.orientation == "x"){
@@ -60,12 +59,12 @@ export class Gizmo {
         gsap.TweenLite.to(this, 0.82, {x:this.target.y});
       }
     }
-    // private renderLoop = function():void{
-    //   //loop 60 frames per second
-    //   requestAnimationFrame(this.renderLoop);
-    //
-    //   this.updatePosition();
-    // }
+    private renderGizmo = function():void{
+      //loop 60 frames per second
+      requestAnimationFrame(this.renderGizmo);
+
+      this.updatePosition();
+    }
     //get and set for rows and columns
     // get active(): boolean {
     //

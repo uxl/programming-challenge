@@ -22,7 +22,8 @@
         "buttonoutline": "0xc3dae5",
         "buttonbackground": "0x55b4c2",
         "dot": "0xcbdee4",
-        "line": "0x425a54"
+        "line": "0x425a54",
+        "gizmo": "0xFFFFD3"
     }
   ]
 }

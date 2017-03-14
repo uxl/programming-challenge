@@ -1,16 +1,35 @@
+//load pixi webgl rendering engine
 import * as PIXI from "pixi.js";
-import { Btn } from "./Btn";
-import { Algorithm } from "./Algorithm";
-import { Gizmo } from "./Gizmo";
+
+//load animation library
 import gsap = require("gsap");
 
-export class Gui {
-    private isBigO1: boolean = true;
+//load graphic assets {sprites, resources(textures)}
+import { Loader } from "./Loader"
 
-    private stage: PIXI.Container;
-    private algorithm: Algorithm;
+//load sounds
+import { SoundEffects } from "./SoundEffects";
+
+//load graphical element
+import { Gizmo } from "./Gizmo";
+
+//load color palettes
+import { ColorPalettes } from "./ColorPalettes";
+
+//load btn class
+import { Btn } from "./Btn";
+
+
+export class UI {
+
+    private controller: Controller;
     private colors: any;
     private sounds: any;
+
+    private stage: PIXI.Container;
+
+    //algorithm option
+    private isBigO1: boolean = true;
 
     //text elements
     private bigO1: PIXI.Text;
@@ -20,21 +39,21 @@ export class Gui {
     private colsTitle: PIXI.Text;
     private colsValue: PIXI.Text;
 
+    //graphic elements
     private line: PIXI.Graphics;
-    private loader = new PIXI.loaders.Loader();
-    private sprites: any = {};
-    private resources: any;
     private marks: any = [];
     private player: PIXI.Sprite;
     private playeroffsets: any;
-    private squaresContainer: PIXI.Container;
-    private arrowContainer: PIXI.Container;
     private grid: any = {};
     private arrows: any = [];
     private tl: gsap.TimelineLite;
     private squareArr: any = [];
     private ran: number = -1;
     private steps: number = 0;
+
+    //container obects
+    private squaresContainer: PIXI.Container;
+    private arrowContainer: PIXI.Container;
 
     private score: any = { off: 0, loop: 0 };
     private cycles: number = 0;
@@ -65,9 +84,43 @@ export class Gui {
         this.algorithm = new Algorithm();
         this.playeroffsets = { x: this.algorithm.spacing / 2, y: this.algorithm.spacing / 2 };
         this.tl = new gsap.TimelineLite({ paused: true, onComplete: this.drawGrid, onCompleteScope: this });
-        this.loadImages();
+        this.assets = new Loader();
+
+        //run dependencies
+        this.changeColors(0); //arg: color index
+        this.loadGraphics();
     }
 
+    //load color palletes - delivered by promise - run dependency
+    private changeColors = function(pindex:number){
+      this.ColorPalettes.loadColors(pindex)
+      .then(function (data) {
+        this.colors = data;
+        this.checkLoad();
+        //setupPixi();
+      })
+      .catch(function (err) {
+        console.error('Augh, there was an error!', err);
+      });
+    }
+
+    //load graphical assets - run dependency
+    private loadGraphics = function(){
+      this.gfx.loadGraphics()
+      .then(function (data) {
+        this.gfx = data; //replace loader instance with returned product //bad?
+        this.checkLoad();
+        //setupPixi();
+      })
+      .catch(function (err) {
+        console.error('Augh, there was an error!', err);
+      });
+    }
+
+    private checkLoad = function(){
+      //check load condition
+      //on success -> setupPixi()
+    }
     //resize event to handle console window opening
     public windowResize = function() {
         //fix textpos
@@ -135,65 +188,6 @@ export class Gui {
                 }
                 break;
         }
-    }
-    //load images and create sprites for buttons, player
-    private loadImages = function(): void {
-        //load images'
-        this.loader = PIXI.loader
-            .add('player_blue', 'src/graphics/player_blue.png')
-            .add('arrow_direction', 'src/graphics/arrow_direction.png')
-            .add('mark_dot', 'src/graphics/mark_dot.png')
-            .add('arrowup_out', 'src/graphics/arrowup_out.png')
-            .add('arrowup_over', 'src/graphics/arrowup_over.png')
-            .add('arrowup_down', 'src/graphics/arrowup_down.png')
-            .add('arrowdown_out', 'src/graphics/arrowdown_out.png')
-            .add('arrowdown_over', 'src/graphics/arrowdown_over.png')
-            .add('arrowdown_down', 'src/graphics/arrowdown_down.png')
-
-            .add('pause_out', 'src/graphics/pause_out.png')
-            .add('pause_over', 'src/graphics/pause_over.png')
-            .add('pause_down', 'src/graphics/pause_down.png')
-
-            .add('play_out', 'src/graphics/play_out.png')
-            .add('play_over', 'src/graphics/play_over.png')
-            .add('play_down', 'src/graphics/play_down.png')
-
-            .add('reset_out', 'src/graphics/reset_out.png')
-            .add('reset_over', 'src/graphics/reset_over.png')
-            .add('reset_down', 'src/graphics/reset_down.png')
-
-            .on('complete', function(loader, resources) {
-                this.sprites.player_blue = new PIXI.Sprite(resources.player_blue.texture);
-                this.sprites.arrow_direction = new PIXI.Sprite(resources.arrow_direction.texture);
-                this.sprites.mark_dot = new PIXI.Sprite(resources.mark_dot.texture);
-                this.sprites.colsup_out = new PIXI.Sprite(resources.arrowup_out.texture);
-                this.sprites.colsup_over = new PIXI.Sprite(resources.arrowup_over.texture);
-                this.sprites.colsup_down = new PIXI.Sprite(resources.arrowup_out.texture);
-                this.sprites.colsdown_out = new PIXI.Sprite(resources.arrowdown_out.texture);
-                this.sprites.colsdown_over = new PIXI.Sprite(resources.arrowdown_over.texture);
-                this.sprites.colsdown_down = new PIXI.Sprite(resources.arrowdown_out.texture);
-                this.sprites.rowsup_out = new PIXI.Sprite(resources.arrowup_out.texture);
-                this.sprites.rowsup_over = new PIXI.Sprite(resources.arrowup_over.texture);
-                this.sprites.rowsup_down = new PIXI.Sprite(resources.arrowup_out.texture);
-                this.sprites.rowsdown_out = new PIXI.Sprite(resources.arrowdown_out.texture);
-                this.sprites.rowsdown_over = new PIXI.Sprite(resources.arrowdown_over.texture);
-                this.sprites.rowsdown_down = new PIXI.Sprite(resources.arrowdown_out.texture);
-
-                this.sprites.pause_out = new PIXI.Sprite(resources.pause_out.texture);
-                this.sprites.pause_over = new PIXI.Sprite(resources.pause_over.texture);
-                this.sprites.pause_down = new PIXI.Sprite(resources.pause_down.texture);
-
-                this.sprites.play_out = new PIXI.Sprite(resources.play_out.texture);
-                this.sprites.play_over = new PIXI.Sprite(resources.play_over.texture);
-                this.sprites.play_down = new PIXI.Sprite(resources.play_down.texture);
-
-                this.sprites.reset_out = new PIXI.Sprite(resources.reset_out.texture);
-                this.sprites.reset_over = new PIXI.Sprite(resources.reset_over.texture);
-                this.sprites.reset_down = new PIXI.Sprite(resources.reset_down.texture);
-
-                this.onLoadCompleted();
-            }.bind(this));
-        this.loader.load();
     }
 
     //build ui after load completion
@@ -472,8 +466,8 @@ export class Gui {
         }.bind(this), 2000);
 
         //gizmo
-        this.gizmoX = new Gizmo(this));
-        this.gizmoY = new Gizmo(this));
+        this.gizmoX = new Gizmo(this);
+        //this.gizmoY = new Gizmo(this));
     }
 
     //gui element drawn
@@ -586,47 +580,58 @@ export class Gui {
 
     //updates the tally on outcomses
     //average forumula doesn't store array of sums to get average. Fixed(2) for display purposes
-    private updateScore = function(data: any) {
-        this.steps = 0;
-        if (data.reset === true) {
-            this.typeMe(this.score_off, "offgrid: 0", 8, 200);
-            this.typeMe(this.score_looped, "looped: 0", 8, 200);
-            this.typeMe(this.steps_average, "average steps: 0", 15, 200);
-        }
-        if (data.team == 'off') {
-            this.score.off++;
-            this.typeMe(this.score_off, "offgrid: " + this.score.off.toString(), 8, 200);
-        }
-        if (data.team == 'loop') {
-            this.score.loop++;
-            this.typeMe(this.score_looped, "looped: " + this.score.loop.toString(), 8, 200);
-        }
-        if (data.steps) {
-            this.cycles++;
-            this.stepsAverage = (((this.stepsAverage * this.cycles) + data.steps) / (this.cycles + 1));
-            this.typeMe(this.steps_average, "average steps: " + this.stepsAverage.toFixed(2).toString(), 15, 200);
-        }
+
+
+
+
+    //Create the app
+    let renderer: any;
+    let stage: PIXI.Container;
+
+
+    let setupPixi = function():void{
+
+      renderer = PIXI.autoDetectRenderer(960,540,
+        {antialias: true, transparent: false, resolution: 1, autoResize: true}
+      );
+      renderer.view.style.position = "absolute";
+      renderer.view.style.display = "block";
+      renderer.autoResize = true;
+      renderer.resize(window.innerWidth, window.innerHeight);
+
+      //Create a container object called the `stage`
+      stage = new PIXI.Container();
+      stage.interactive = true;
+
+      //Add the canvas to the HTML document
+      document.body.appendChild(renderer.view);
+
+      //Update background color
+      renderer.backgroundColor = colors['background'];
+
+      drawScene();
     }
 
-    //typing animation
-    private typeMe = function(textObj: PIXI.Text, message: string, messageLength: number, delay: number): void {
-        if (messageLength === undefined) {
-            textObj.text = "";
-            messageLength = 0;
-        }
+    //Draw scene
+    let drawScene = function(){
+        //init Gui pass in colors
+        maingui = new Gui( stage, colors, SOUNDLIB);
+        //start rendering engine
+        renderLoop();
+        console.log("started renderLoop");
+    };
 
-        //loop through typing
-        let newString: string = message.substring(0, messageLength);
-        textObj.text = newString;
-        if (messageLength >= 1) {
-            this.sounds.play("keypress");
-        }
 
-        //increment length of message
-        messageLength++;
+    let renderLoop = function():void{
+      //loop 60 frames per second
+      requestAnimationFrame(renderLoop);
 
-        if (messageLength < message.length + 1) {
-            setTimeout(this.typeMe.bind(this, textObj, message, messageLength, 50), delay);
-        }
+      renderer.render(stage);
     }
+    // var reqestAniFrame = new requestAnimationFrame(fps, callback);
+
+    //Resize electron window
+    window.onresize = function (event):void{
+      maingui.windowResize();
+    };
 }

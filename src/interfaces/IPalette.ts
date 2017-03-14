@@ -8,5 +8,6 @@ export interface IPalette {
   buttonoutline: number,
   buttonbackground: number,
   dot: number,
-  line: number
+  line: number,
+  gizmo: number
 }

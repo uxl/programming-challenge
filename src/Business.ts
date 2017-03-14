@@ -1,4 +1,7 @@
-export class Algorithm {
+//load ScoreBoard class
+import { ScoreBoard } from "./ScoreBoard";
+
+export class Business {
 
     //define size of checkerboard
     private _rows: number = 10;
@@ -8,7 +11,6 @@ export class Algorithm {
 
     constructor() {
     }
-
 
     //get and set for rows and columns
     get rows(): number {
