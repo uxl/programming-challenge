@@ -1,9 +1,12 @@
 /// <reference path="../typings/index.d.ts" />
 
 //load Interface
-import { UI } from "./UI";
-
+import { UI } from "./classes/ui/UI";
 let ui = new UI();
+
+//load Business Logic
+import { Business } from "./classes/business/Business";
+let business = new Business();
 
 /*
 index.ts

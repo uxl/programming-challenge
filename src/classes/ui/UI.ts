@@ -27,6 +27,7 @@ import { Gizmo } from "./Gizmo";
 import { Grid } from "./Grid";
 
 //renderloop
+import { RenderLoop } from "./RenderLoop"
 
 export class UI {
 
@@ -83,21 +84,7 @@ export class UI {
     this.startRender();
   }
 
-  //Start render loop - make RenderLoop Class?
-  private startRender = function(){
-      //init Gui pass in colors
-      //this.maingui = new Gui( stage, colors, SOUNDLIB);
-      //start rendering engine
-      this.renderLoop();
-      console.log("started renderLoop");
-  };
 
-  private renderLoop = function():void{
-    //loop 60 frames per second
-    requestAnimationFrame(this.renderLoop);
-
-    this.renderer.render(this.stage);
-  }
   // var reqestAniFrame = new requestAnimationFrame(fps, callback);
 
 
