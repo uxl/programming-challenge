@@ -6,7 +6,6 @@ export class Business {
     //define size of checkerboard
     private _rows: number = 10;
     private _cols: number = 10;
-    private _spacing: number = 50; //row vs col => row.width * rows; min:2px max: 50px;
     private grid: Object = {};
 
     constructor() {
@@ -27,12 +26,7 @@ export class Business {
         this._cols = newval;
         this._rows = newval;
     }
-    get spacing(): number {
-        return this._spacing;
-    }
-    set spacing(newval: number) {
-        this._spacing = newval;
-    }
+
 
     //returns grid object with {x:n, y:n, visited:boolean}
     public reset = function() {

@@ -10,25 +10,100 @@ import { Loader } from "./Loader"
 //load sounds
 import { SoundEffects } from "./SoundEffects";
 
-//load graphical element
-import { Gizmo } from "./Gizmo";
-
 //load color palettes
 import { ColorPalettes } from "./ColorPalettes";
 
-//load btn class
+
+//load btn display object
 import { Btn } from "./Btn";
 
+//load player display object
+import { Player } from "./Player";
+
+//load gizmo display object
+import { Gizmo } from "./Gizmo";
+
+//grid - display object
+import { Grid } from "./Grid";
+
+//renderloop
 
 export class UI {
 
-    private controller: Controller;
-    private colors: any;
-    private sounds: any;
 
-    private stage: PIXI.Container;
+  //Create the app
+  private assets: Loader;
+  private sounds: any;
+  private renderer: any;
+  private stage: PIXI.Container;
+  private colors: any;
 
-    //algorithm option
+  //layout config?
+  private _spacing: number = 50;
+
+  constructor() {
+      // this.stage = mainStage;
+      // this.sounds = mainSounds;
+      //
+      // this.business = new Algorithm();
+      this.playeroffsets = { x: this._spacing / 2, y: this._spacing / 2 };
+      this.tl = new gsap.TimelineLite({ paused: true, onComplete: this.drawGrid, onCompleteScope: this });
+      this.assets = new Loader();
+
+      //run dependencies
+      this.changeColors(0); //arg: color index
+      this.loadGraphics();
+
+      //Resize electron window
+      window.onresize = function (event):void{
+        this.windowResize();
+      }.bind(this);
+  }
+
+  private setupPixi = function():void{
+
+    this.renderer = PIXI.autoDetectRenderer(960,540,
+      {antialias: true, transparent: false, resolution: 1, autoResize: true}
+    );
+    this.renderer.view.style.position = "absolute";
+    this.renderer.view.style.display = "block";
+    this.renderer.autoResize = true;
+    this.renderer.resize(window.innerWidth, window.innerHeight);
+
+    //Create a container object called the `stage`
+    this.stage = new PIXI.Container();
+    this.stage.interactive = true;
+
+    //Add the canvas to the HTML document
+    document.body.appendChild(this.renderer.view);
+
+    //Update background color
+    this.renderer.backgroundColor = this.colors['background'];
+
+    this.startRender();
+  }
+
+  //Start render loop - make RenderLoop Class?
+  private startRender = function(){
+      //init Gui pass in colors
+      //this.maingui = new Gui( stage, colors, SOUNDLIB);
+      //start rendering engine
+      this.renderLoop();
+      console.log("started renderLoop");
+  };
+
+  private renderLoop = function():void{
+    //loop 60 frames per second
+    requestAnimationFrame(this.renderLoop);
+
+    this.renderer.render(this.stage);
+  }
+  // var reqestAniFrame = new requestAnimationFrame(fps, callback);
+
+
+
+
+    //business option
     private isBigO1: boolean = true;
 
     //text elements
@@ -52,8 +127,6 @@ export class UI {
     private steps: number = 0;
 
     //container obects
-    private squaresContainer: PIXI.Container;
-    private arrowContainer: PIXI.Container;
 
     private score: any = { off: 0, loop: 0 };
     private cycles: number = 0;
@@ -77,19 +150,7 @@ export class UI {
     //create timeline
     //player offset based on size of squares
 
-    constructor(mainStage: PIXI.Container, mainColors: any, mainSounds: any) {
-        this.stage = mainStage;
-        this.colors = mainColors;
-        this.sounds = mainSounds;
-        this.algorithm = new Algorithm();
-        this.playeroffsets = { x: this.algorithm.spacing / 2, y: this.algorithm.spacing / 2 };
-        this.tl = new gsap.TimelineLite({ paused: true, onComplete: this.drawGrid, onCompleteScope: this });
-        this.assets = new Loader();
 
-        //run dependencies
-        this.changeColors(0); //arg: color index
-        this.loadGraphics();
-    }
 
     //load color palletes - delivered by promise - run dependency
     private changeColors = function(pindex:number){
@@ -122,7 +183,7 @@ export class UI {
       //on success -> setupPixi()
     }
     //resize event to handle console window opening
-    public windowResize = function() {
+    private windowResize = function() {
         //fix textpos
         console.log("resizeWindow");
         if (this.squaresContainer) {
@@ -142,7 +203,7 @@ export class UI {
                 if (!this.isPlaying && !this.isPaused) {
                     this.sounds.play("beep");
                     this.isPlaying = true;
-                    this.createPlayer();
+                    //this.createPlayer();
                     this.playButton.active = true;
                     this.pauseButton.active = false;
 
@@ -167,7 +228,7 @@ export class UI {
                 this.updateScore({ reset: true });
                 this.tl.clear();
                 this.drawGrid();
-                this.removePlayer();
+                //this.removePlayer();
                 this.playButton.active = false;
                 this.pauseButton.active = false;
                 break;
@@ -203,18 +264,18 @@ export class UI {
 
     // add rows/cols button handler
     private increaseGrid() {
-        this.algorithm.rows++;
-        this.algorithm.cols++;
-        this.typeMe(this.rowsValue, this.algorithm.rows.toString(), 0, 0);
-        this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 0);
+        this.business.rows++;
+        this.business.cols++;
+        this.typeMe(this.rowsValue, this.business.rows.toString(), 0, 0);
+        this.typeMe(this.colsValue, this.business.cols.toString(), 0, 0);
     }
 
     // remove rows/cols button handler
     private reduceGrid() {
-        this.algorithm.rows--;
-        this.algorithm.cols--;
-        this.typeMe(this.rowsValue, this.algorithm.rows.toString(), 0, 0);
-        this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 0);
+        this.business.rows--;
+        this.business.cols--;
+        this.typeMe(this.rowsValue, this.business.rows.toString(), 0, 0);
+        this.typeMe(this.colsValue, this.business.cols.toString(), 0, 0);
     }
 
     //instantiate buttons
@@ -257,98 +318,12 @@ export class UI {
         var padx = this.squaresContainer.x + padx;
         var pady = this.squaresContainer.y + pady;
         //calculate position
-        pos.x = this.grid[gridIndex].x * this.algorithm.spacing + padx;
-        pos.y = this.grid[gridIndex].y * this.algorithm.spacing + pady;
+        pos.x = this.grid[gridIndex].x * this._spacing + padx;
+        pos.y = this.grid[gridIndex].y * this._spacing + pady;
         pos.angle = ((this.grid[gridIndex].direction * 90) * Math.PI / 180);
         return pos;
     }
-    //make arrows
-    private drawArrows = function(): void {
-        if (this.arrows.length > 0) {
-            for (var i = 0; i < this.arrows.length; i++) {
-                this.arrows[i].destroy();
-            }
-        }
-        this.arrows = [];
-        for (var i = 0; i < this.grid.length; i++) {
-            this.arrows.push(new PIXI.Sprite(this.loader.resources.arrow_direction.texture));
-            this.stage.addChild(this.arrows[i]);
-            this.arrows[i].anchor.set(0.5, 0.5);
-            var padx = 25;
-            var pady = 25;
-            var pos = this.getPosition(padx, pady, i);
-            gsap.TweenLite.to(this.arrows[i].position, 0, { x: pos.x, y: pos.y });
-            gsap.TweenLite.to(this.arrows[i], 0, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true } });
-        }
-        this.arrowContainer.x = (this.squaresContainer.width);
-        this.arrowContainer.y = (this.squaresContainer.height);
-    }
-    //takes index, duration, delay and if you want to queue multiple events onto timeline
-    private movePlayer = function(gridIndex: number, nduration: number, ndelay: number, queue: boolean): void {
-        //calculate position
-        var pos = this.getPosition(this.playeroffsets.x, this.playeroffsets.y, gridIndex);
 
-        //set visited
-        this.grid[gridIndex].visited = true;
-
-        var visitedFilter = new PIXI.filters.BlurFilter();
-        this.squareArr[gridIndex].filters = [visitedFilter];
-        visitedFilter.blur = 0;
-        if (queue) {
-            this.tl.add(gsap.TweenLite.to(this.player.position, nduration, { x: pos.x, y: pos.y, delay: ndelay }));
-            this.tl.add(gsap.TweenLite.to(this.player, nduration, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true }, delay: ndelay }));
-            this.tl.add(gsap.TweenLite.to(visitedFilter, 0.3, { blur: 10, ease: gsap.quadIn, delay: 0 }));
-        } else {
-            gsap.TweenLite.to(this.player.position, nduration, { x: pos.x, y: pos.y, delay: ndelay });
-            gsap.TweenLite.to(this.player, nduration, { directionalRotation: { rotation: (pos.angle + '_short'), useRadians: true }, delay: ndelay }, 0);
-            gsap.TweenLite.to(visitedFilter, nduration, { blur: 10, ease: gsap.quadIn, delay: ndelay });
-        }
-    }
-    //remove player - play yelp
-    private removePlayer = function(): void {
-        this.stage.removeChild(this.player);
-    }
-    //utility to convert radians
-    private radians = function(degrees: number) {
-        var radians = degrees * (Math.PI / 180)
-        return radians % (Math.PI / 180);
-    }
-    //utility to convert degrees
-    private degrees = function(radians: number) {
-        var degrees = radians * (180 / Math.PI);
-        return degrees;
-    }
-
-    //create player, position
-    private createPlayer = function(): void {
-        //get random position
-        this.ran = this.algorithm.randomStart();
-
-        //graphic offset
-        var padx = this.squaresContainer.x + this.playeroffsets.x;
-        var pady = this.squaresContainer.y + this.playeroffsets.y;
-        //calculate position
-        var posx = this.grid[this.ran].x * this.algorithm.spacing + padx;
-        var posy = this.grid[this.ran].y * this.algorithm.spacing + pady;
-
-        //player
-        this.player = this.sprites.player_blue;
-        this.stage.addChild(this.player);
-        this.player.anchor.set(0.5, 0.4);
-
-        this.movePlayer(this.ran, 0, 0);
-        this.sounds.play("start");
-
-        //check outcome
-        if (this.isBigO1) {
-            var result = this.algorithm.checkLoop(this.grid, this.ran);
-            this.bigO1.text = result.message;
-        }
-        //run simulation
-        if (this.isPlaying) {
-            this.runSolution(this.ran);
-        }
-    }
 
     //animates and solves using visited flag in grid object
     private runSolution = function(gridIndex: number) {
@@ -359,7 +334,7 @@ export class UI {
         var next: any;
         var runTest = true;
 
-        var next = this.algorithm.getNext(this.grid[newIndex]);
+        var next = this.business.getNext(this.grid[newIndex]);
         newIndex = this.findIndex(next.x, next.y);
 
         var count = 0;
@@ -376,8 +351,8 @@ export class UI {
                     this.tl.add(gsap.TweenLite.to(this, 2, {}));
                     this.tl.play();
                 } else {
-                    this.movePlayer(newIndex, 0.3, 0, true);
-                    next = this.algorithm.getNext(this.grid[newIndex]);
+                    //this.movePlayer(newIndex, 0.3, 0, true);
+                    next = this.business.getNext(this.grid[newIndex]);
                     newIndex = this.findIndex(next.x, next.y);
                 }
             } else {
@@ -404,71 +379,7 @@ export class UI {
         return n % 2 == 0;
     }
 
-    //redraws squares
-    private drawGrid = function() {
-        this.sounds.play("result");
 
-        if (this.squareArr.length > 0) {
-            for (var i = 0; i < this.squareArr.length; i++) {
-                this.squareArr[i].destroy();
-            }
-            this.squareArr = [];
-        }
-        this.grid = this.algorithm.reset();
-        if (this.squaresContainer) {
-            this.squaresContainer.destroy();
-        }
-        this.squaresContainer = new PIXI.Container();
-        this.stage.addChild(this.squaresContainer);
-
-        //using graphics for squares
-        //animates squares on
-        var squarecolor: number;
-        this.squareArr = [];
-        for (var i = 0; i < this.grid.length; i++) {
-            // set a fill and line style
-            if (this.isEven(Math.floor(i / this.algorithm.rows))) { // if even row
-                if (this.isEven(i)) { //if even
-                    squarecolor = this.colors.squaredark;
-                } else { //if odd
-                    squarecolor = this.colors.squarelight;
-                }
-            } else { //if odd row
-                if (this.isEven(i)) { //if even
-                    squarecolor = this.colors.squarelight;
-                } else { //if odd
-                    squarecolor = this.colors.squaredark;
-                }
-            }
-            var squareContainer = new PIXI.Container();
-            var square = new PIXI.Graphics();
-            square.beginFill(squarecolor, 1);
-            square.lineStyle(1, this.colors.lines, 1);
-            var x = (i % this.algorithm.cols) * this.algorithm.spacing;
-            var y = Math.floor(i / this.algorithm.rows) * this.algorithm.spacing;
-            square.drawRect(x, y, this.algorithm.spacing, this.algorithm.spacing);
-            square.drawRect(x, y, this.algorithm.spacing, this.algorithm.spacing);
-            squareContainer.addChild(square);
-            squareContainer.alpha = 0;
-            this.squareArr.push(squareContainer);
-            this.squaresContainer.addChild(this.squareArr[i]);
-            gsap.TweenLite.to(this.squareArr[i], 0.1, { alpha: 1, delay: Math.random() * 0.4 });
-        }
-
-        // Center on the screen
-        this.squaresContainer.x = (window.innerWidth - this.squaresContainer.width) / 2;
-        this.squaresContainer.y = (window.innerHeight - this.squaresContainer.height) / 2;
-        this.drawArrows();
-        setTimeout(function() {
-            if (this.isPlaying) {
-                this.createPlayer();
-            }
-        }.bind(this), 2000);
-
-        //gizmo
-        this.gizmoX = new Gizmo(this);
-        //this.gizmoY = new Gizmo(this));
-    }
 
     //gui element drawn
     private createLine = function(): void {
@@ -557,7 +468,7 @@ export class UI {
         this.rowsValue.y = window.innerHeight - 50;
 
         this.stage.addChild(this.rowsValue);
-        this.typeMe(this.rowsValue, this.algorithm.rows.toString(), 0, 4000);
+        this.typeMe(this.rowsValue, this.business.rows.toString(), 0, 4000);
 
         //cols title
         this.colsTitle = new PIXI.Text('...:', style);
@@ -573,65 +484,14 @@ export class UI {
         this.colsValue.y = window.innerHeight - 50;
 
         this.stage.addChild(this.colsValue);
-        this.typeMe(this.colsValue, this.algorithm.cols.toString(), 0, 5000);
+        this.typeMe(this.colsValue, this.business.cols.toString(), 0, 5000);
 
         setTimeout(this.drawGrid.bind(this), 6000);
     }
-
-    //updates the tally on outcomses
-    //average forumula doesn't store array of sums to get average. Fixed(2) for display purposes
-
-
-
-
-    //Create the app
-    let renderer: any;
-    let stage: PIXI.Container;
-
-
-    let setupPixi = function():void{
-
-      renderer = PIXI.autoDetectRenderer(960,540,
-        {antialias: true, transparent: false, resolution: 1, autoResize: true}
-      );
-      renderer.view.style.position = "absolute";
-      renderer.view.style.display = "block";
-      renderer.autoResize = true;
-      renderer.resize(window.innerWidth, window.innerHeight);
-
-      //Create a container object called the `stage`
-      stage = new PIXI.Container();
-      stage.interactive = true;
-
-      //Add the canvas to the HTML document
-      document.body.appendChild(renderer.view);
-
-      //Update background color
-      renderer.backgroundColor = colors['background'];
-
-      drawScene();
+    get spacing(): number {
+        return this._spacing;
     }
-
-    //Draw scene
-    let drawScene = function(){
-        //init Gui pass in colors
-        maingui = new Gui( stage, colors, SOUNDLIB);
-        //start rendering engine
-        renderLoop();
-        console.log("started renderLoop");
-    };
-
-
-    let renderLoop = function():void{
-      //loop 60 frames per second
-      requestAnimationFrame(renderLoop);
-
-      renderer.render(stage);
+    set spacing(newval: number) {
+        this._spacing = newval;
     }
-    // var reqestAniFrame = new requestAnimationFrame(fps, callback);
-
-    //Resize electron window
-    window.onresize = function (event):void{
-      maingui.windowResize();
-    };
-}
+  }

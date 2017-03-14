@@ -1,7 +1,9 @@
 export class ScoreBoard {
   constructor(){
-    
+
   }
+  //updates the tally on outcomses
+  //average forumula doesn't store array of sums to get average. Fixed(2) for display purposes
   private updateScore = function(data: any) {
       this.steps = 0;
       if (data.reset === true) {
